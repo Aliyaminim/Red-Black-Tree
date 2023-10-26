@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#include "tree.hpp"
 
 //статическая функция
 namespace {
@@ -16,7 +17,18 @@ template <typename C, typename T> int range_query(const C &s, T fst, T snd) {
 }
 
 int main() {
-  std::set<int> s;
+  Trees::Search_RBTree<int> tree; 
+
+  for (;;) {
+    int value;
+    std::cin >> value;
+    if (!std::cin)
+      break;
+    assert(std::cin.good());
+    tree.rb_insert(value);
+  }
+  std::cout << tree.root->key << std::endl;
+  /*std::set<int> s;
   for (;;) {
     char c;
     std::cin >> c;
@@ -35,5 +47,5 @@ int main() {
       std::cout << range_query(s, fst, snd) << " ";
     }
   }
-  std::cout << std::endl;
+  std::cout << std::endl;*/
 }
