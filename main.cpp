@@ -18,8 +18,8 @@ template <typename C, typename T> int range_query(const C &s, T fst, T snd) {
 
 int main() {
   Trees::Search_RBTree<int> tree{}; 
-  assert(tree.nil->color == Trees::color_type::black);
-  assert(tree.root != nullptr);
+  //assert(tree.nil->color == Trees::color_type::black);
+  //assert(tree.root != nullptr);
 
   for (;;) {
     int value;
@@ -29,7 +29,7 @@ int main() {
     assert(std::cin.good());
     tree.rb_insert(value);
   }
-  std::cout << tree.root->key << std::endl;
+  tree.print();
   //tree.dump_tree();
   /*std::set<int> s;
   for (;;) {

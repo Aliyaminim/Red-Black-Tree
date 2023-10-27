@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <vector>
+#include <iterator>
+#include <cassert>
 
 //store all nodes in std::vector, because it will delete and copy with no problems;
 //iterators or pointers
@@ -12,36 +15,45 @@ namespace Trees {
 
 enum class color_type { red, black };
 
-
 template <typename KeyT>
 class Search_RBTree {
+
     struct Node {
         KeyT key;
-        Node *parent, *left, *right;
+        typename std::vector<Node>::iterator parent, left, right;
         //int black_height = 0;
         color_type color = color_type::red;
 
         Node() = default;
-        Node(KeyT key_, Node* default_ptr = nullptr) : key(key_), parent(default_ptr), left(default_ptr),
-                                                       right(default_ptr) {};
-        ~Node() { delete left; delete right;}
+        Node(KeyT key_, typename std::vector<Node>::iterator default_it) : key(key_), parent(default_it),
+                                                            left(default_it), right(default_it) {};
     };
-    //Node* nil = nullptr;
-    //Node* root = nullptr;
+
+
+    using NodeIt = typename std::vector<Node>::iterator;
+
+    std::vector<Node> node_storage;
+    NodeIt nil = node_storage.end(); //leaves in tree
+    //NodeIt root = nil;
 
 public:
-    Node* nil = nullptr;
-    Node* root = nullptr;
-
+    NodeIt root = nil; //temporarily
     //constructor
-    Search_RBTree(Node* nil_ = new Node()): nil(nil_) {
+    Search_RBTree() {
+        node_storage.emplace_back();
+        nil = std::prev(node_storage.end());
         nil->color = color_type::black; //constructing leaves in tree
         root = nil;
     }
 
 public: // селекторы
-    //Search_RBTree()
-    //Node* lower_bound(KeyT key) const;
+    /*Node* find(const KeyT key) {
+        Node* x 
+    }*/
+    
+
+
+    //Node* lower_bound(KeyT key) const; O(log N)
     //Node* upper_bound(KeyT key) const;
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы
@@ -53,8 +65,8 @@ public: // модификаторы
   y   <==     x
   left_rotate(y)
 */
-    void right_rotate(Node* x) {
-        Node* y = x->left;
+    void right_rotate(NodeIt x) {
+        NodeIt y = x->left;
         x->left = y->right;
         if(y->right != nil)
             y->right->parent = x;
@@ -69,8 +81,9 @@ public: // модификаторы
         y->right = x;
         x->parent = y;
     }
-    void left_rotate(Node* x) {
-        Node* y = x->right;
+
+    void left_rotate(NodeIt x) {
+        NodeIt y = x->right;
         x->right = y->left;
         if (y->left != nil)
             y->left->parent = x;
@@ -85,16 +98,17 @@ public: // модификаторы
         y->left = x;
         x->parent = y;
     }
-    void tree_insert(Node* new_node, const KeyT key) {
-        Node* y = nil;
-        Node* x = root;
+
+    void tree_insert(const KeyT key) {
+        NodeIt new_node = std::prev(node_storage.end());
+        NodeIt y = nil;
+        NodeIt x = root;
 
         while (x != nil) {
             y = x;
+            assert((key != x->key) && "oops, repetitive keys aren't expected");
             if (key < x->key)
                 x = x->left;
-            else if (x->key == key) 
-                std::cout << "oops, repetitive keys aren't expected" << std::endl;
             else
                 x = x->right;
         }
@@ -106,9 +120,11 @@ public: // модификаторы
         else 
             y->right = new_node;
     }
-    void tree_balance(Node* new_node) {
-        Node* y = nil;
-        Node* z = new_node;
+
+    void tree_balance() {
+        NodeIt new_node = std::prev(node_storage.end());
+        NodeIt y = nil;
+        NodeIt z = new_node;
         while (z->parent->color == color_type::red) {
             if (z->parent == z->parent->parent->left) {
                 y = z->parent->parent->right;
@@ -147,11 +163,32 @@ public: // модификаторы
         root->color = color_type::black;
     }
 
+    //insert new node with given key and balance red-black tree
     void rb_insert(const KeyT key) {
-        Node* new_node = new Node(key, nil);
-        tree_insert(new_node, key);
-        tree_balance(new_node);
+        node_storage.emplace_back(key, nil); //new_node is always in the end of node_storage
+        tree_insert(key);
+        tree_balance();
     }
-};
+
+    void print_2(NodeIt x, int space) {
+        if (x != nil) {
+            space += 10;
+            print_2(x->right, space);
+            std::cout << std::endl;
+            for (int i = 10; i < space; i++)
+                std::cout << " ";
+            std::cout << x->key;
+            if (x->color == color_type::black)
+                std::cout << "b" << std::endl;
+            else
+                std::cout << "r" << std::endl;
+            print_2(x->left, space);
+        }
+    }
+
+    void print() {
+        print_2(root, 0);
+    }
+}; //class Search_RBTree
 } //namespace Trees
 
