@@ -5,6 +5,7 @@
 
 //store all nodes in std::vector, because it will delete and copy with no problems;
 //iterators or pointers
+//find why segfault
 
 
 namespace Trees {
@@ -25,26 +26,65 @@ class Search_RBTree {
                                                        right(default_ptr) {};
         ~Node() { delete left; delete right;}
     };
+    //Node* nil = nullptr;
+    //Node* root = nullptr;
 
-    Node* nil = nullptr;
-
-    //rotation flags
 public:
+    Node* nil = nullptr;
     Node* root = nullptr;
-    Search_RBTree() {
-        //constructing leaves in tree
-        Node* nil = new Node;
-        nil->color = color_type::black;
-        //does parent of root need to be assigned to nil?
+
+    //constructor
+    Search_RBTree(Node* nil_ = new Node()): nil(nil_) {
+        nil->color = color_type::black; //constructing leaves in tree
         root = nil;
     }
 
 public: // селекторы
     //Search_RBTree()
-    //iterator lower_bound(KeyT key) const;
-    //iterator upper_bound(KeyT key) const;
-    //int distance(iterator fst, iterator snd) const;
+    //Node* lower_bound(KeyT key) const;
+    //Node* upper_bound(KeyT key) const;
+    //int distance(Node* fst, Node* snd) const;
 public: // модификаторы
+
+/* right_rotate(x)
+    |       |
+    x  ==>  y  
+   /         \
+  y   <==     x
+  left_rotate(y)
+*/
+    void right_rotate(Node* x) {
+        Node* y = x->left;
+        x->left = y->right;
+        if(y->right != nil)
+            y->right->parent = x;
+        
+        y->parent = x->parent;
+        if(x->parent == nil)
+            root = y;
+        else if (x == x->parent->left)
+            x->parent->left = y;
+        else    
+            x->parent->right = y;
+        y->right = x;
+        x->parent = y;
+    }
+    void left_rotate(Node* x) {
+        Node* y = x->right;
+        x->right = y->left;
+        if (y->left != nil)
+            y->left->parent = x;
+        
+        y->parent = x->parent;
+        if (x->parent == nil)
+            root = y;
+        else if (x == x->parent->left)
+            x->parent->left = y;
+        else 
+            x->parent->right = y;
+        y->left = x;
+        x->parent = y;
+    }
     void tree_insert(Node* new_node, const KeyT key) {
         Node* y = nil;
         Node* x = root;
@@ -80,27 +120,27 @@ public: // модификаторы
                 } else {
                     if (z == z->parent->right) {
                         z = z->parent;
-                        //left_rotate(z);
+                        left_rotate(z);
                     }
                     z->parent->color = color_type::black;
                     z->parent->parent->color = color_type::red;
-                    //right_rotate(z->parent->parent);
+                    right_rotate(z->parent->parent);
                 }
             } else {
-                y = z->parent->parent->right;
+                y = z->parent->parent->left;
                 if (y->color == color_type::red) {
                     z->parent->color = color_type::black;
                     y->color = color_type::black;
                     z->parent->parent->color = color_type::red;
                     z = z->parent->parent;
                 } else {
-                    if (z == z->parent->right) {
+                    if (z == z->parent->left) {
                         z = z->parent;
-                        //right_rotate(z);
+                        right_rotate(z);
                     }
                     z->parent->color = color_type::black;
                     z->parent->parent->color = color_type::red;
-                    //left_rotate(z->parent->parent);
+                    left_rotate(z->parent->parent);
                 }
             }
         } //while
