@@ -34,10 +34,9 @@ class Search_RBTree {
 
     std::vector<Node> node_storage;
     NodeIt nil = node_storage.end(); //leaves in tree
-    //NodeIt root = nil;
+    NodeIt root = nil;
 
 public:
-    NodeIt root = nil; //temporarily
     //constructor
     Search_RBTree() {
         node_storage.emplace_back();
@@ -47,14 +46,61 @@ public:
     }
 
 public: // селекторы
-    /*Node* find(const KeyT key) {
-        Node* x 
-    }*/
-    
+    //NodeIt find(const KeyT key) {};
+
+    NodeIt lower_bound(const KeyT key) const {
+        NodeIt curr = root;
+        NodeIt prev = curr;
+        int mode;
+        while(curr != nil) {
+            prev = curr;
+            if (key > curr->key) {
+                mode = 1;
+                curr = curr->right;
+            } else if (key == curr->key)
+                return curr;
+            else {
+                mode = 0;
+                curr = curr->left;
+            }
+        }
+        
+        if (mode == 1) 
+            return prev->parent;
+        else 
+            return prev;
+    }
 
 
-    //Node* lower_bound(KeyT key) const; O(log N)
-    //Node* upper_bound(KeyT key) const;
+    NodeIt upper_bound(KeyT key) const {
+        NodeIt curr = root;
+        NodeIt prev = curr;
+        int mode = 0;
+        while(curr != nil) {
+            prev = curr;
+            if (key > curr->key) {
+                mode = 1;
+                curr = curr->right;
+            } else if (key == curr->key)
+                mode = 3;
+                break;
+                if (curr )
+                return curr->right;
+            else {
+                mode = 0;
+                curr = curr->left;
+            }
+        }
+
+        if (mode == 3)
+
+
+
+        if (mode == 1) 
+            return prev->parent;
+        else 
+            return prev;
+    }
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы
 
