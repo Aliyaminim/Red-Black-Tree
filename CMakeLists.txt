@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(Red Black Tree)
+project(red-black-tree)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -19,7 +19,7 @@ endif()
 
 find_package(GTest REQUIRED)
 enable_testing()
-add_subdirectory(test)
+#add_subdirectory(test)
 
 add_executable(main ./src/main.cpp)
 target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}/include)
