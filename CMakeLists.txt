@@ -10,7 +10,7 @@ if (${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
     message(FATAL_ERROR "In-source build is forbidden")
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0 -D DEBUG -fsanitize=address -fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0 -D DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -O2 -DNDEBUG")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -19,7 +19,7 @@ endif()
 
 find_package(GTest REQUIRED)
 enable_testing()
-#add_subdirectory(test)
+add_subdirectory(test)
 
 add_executable(main ./src/main.cpp)
 target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}/include)

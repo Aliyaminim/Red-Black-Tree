@@ -6,11 +6,6 @@
 #include <iterator>
 #include <cassert>
 
-//store all nodes in std::vector, because it will delete and copy with no problems;
-//iterators or pointers
-//find why segfault
-
-
 namespace Trees {
 
 enum class color_type { red, black };
@@ -46,43 +41,51 @@ public:
     }
 
 public: // селекторы
-    void inorderTraversalHelper(Node* node) {
-        if (node != nullptr) {
-            inorderTraversalHelper(node->left);
-            std::cout << node->data << " ";
-            inorderTraversalHelper(node->right);
-        }
-    }
 
-    void inorderTraversalHelper(NodeIt node, const KeyT key, NodeIt &res) const {
+    void inorderTraversalHelper(NodeIt node, const KeyT key, NodeIt &res, int mode) const {
         if (node != nil) {
             if (key < node->key)
-                inorderTraversalHelper(node->left, key, res);
-            if ((node->key >= key) && (res == nil)) {
-                res = node;
-                return;
+                inorderTraversalHelper(node->left, key, res, mode);
+            if (mode == 0) {
+                //lower_bound()
+                if ((node->key >= key) && (res == nil)) {
+                    res = node;
+                    return;
+                }  
             }
+            if (mode == 1) {
+                //upper_bound()
+                if ((node->key > key) && (res == nil)) {
+                    res = node;
+                    return;
+                }  
+            }       
             if(key > node->key)
-                inorderTraversalHelper(node->right, key, res);
+                inorderTraversalHelper(node->right, key, res, mode);
         }
         return;
     }
 
     NodeIt lower_bound(const KeyT key) const {
         NodeIt res = nil;
-        inorderTraversalHelper(root, key, res);
+        inorderTraversalHelper(root, key, res, 0);
 
         return res;
     }
 
 
     NodeIt upper_bound(const KeyT key) const {
-        NodeIt res;
-        inorderTraversalHelper(root, key, res);
-        if (res->key == key)
-            return std::next(res);
-        else
-            return res;
+        NodeIt res = nil;
+        inorderTraversalHelper(root, key, res, 1);
+
+        return res;
+    }
+
+    int range_query(const KeyT fst, const KeyT snd) const {
+        NodeIt start = lower_bound(fst);
+        NodeIt fin = upper_bound(snd);
+        //return mydistance(start, fin);
+        return 0;
     }
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы

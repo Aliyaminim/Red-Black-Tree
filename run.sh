@@ -7,5 +7,5 @@ cd build/
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 cd ..
-#cd ./build/test
-#./test1
+cd ./build/test
+./test1
