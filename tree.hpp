@@ -46,60 +46,43 @@ public:
     }
 
 public: // селекторы
-    //NodeIt find(const KeyT key) {};
+    void inorderTraversalHelper(Node* node) {
+        if (node != nullptr) {
+            inorderTraversalHelper(node->left);
+            std::cout << node->data << " ";
+            inorderTraversalHelper(node->right);
+        }
+    }
+
+    void inorderTraversalHelper(NodeIt node, const KeyT key, NodeIt &res) const {
+        if (node != nil) {
+            if (key < node->key)
+                inorderTraversalHelper(node->left, key, res);
+            if ((node->key >= key) && (res == nil)) {
+                res = node;
+                return;
+            }
+            if(key > node->key)
+                inorderTraversalHelper(node->right, key, res);
+        }
+        return;
+    }
 
     NodeIt lower_bound(const KeyT key) const {
-        NodeIt curr = root;
-        NodeIt prev = curr;
-        int mode;
-        while(curr != nil) {
-            prev = curr;
-            if (key > curr->key) {
-                mode = 1;
-                curr = curr->right;
-            } else if (key == curr->key)
-                return curr;
-            else {
-                mode = 0;
-                curr = curr->left;
-            }
-        }
-        
-        if (mode == 1) 
-            return prev->parent;
-        else 
-            return prev;
+        NodeIt res = nil;
+        inorderTraversalHelper(root, key, res);
+
+        return res;
     }
 
 
-    NodeIt upper_bound(KeyT key) const {
-        NodeIt curr = root;
-        NodeIt prev = curr;
-        int mode = 0;
-        while(curr != nil) {
-            prev = curr;
-            if (key > curr->key) {
-                mode = 1;
-                curr = curr->right;
-            } else if (key == curr->key)
-                mode = 3;
-                break;
-                if (curr )
-                return curr->right;
-            else {
-                mode = 0;
-                curr = curr->left;
-            }
-        }
-
-        if (mode == 3)
-
-
-
-        if (mode == 1) 
-            return prev->parent;
-        else 
-            return prev;
+    NodeIt upper_bound(const KeyT key) const {
+        NodeIt res;
+        inorderTraversalHelper(root, key, res);
+        if (res->key == key)
+            return std::next(res);
+        else
+            return res;
     }
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы

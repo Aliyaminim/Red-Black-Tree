@@ -30,6 +30,7 @@ int main() {
     tree.rb_insert(value);
   }
   tree.print();
+  std::cout << tree.lower_bound(5)->key << std::endl;
 
   //std::cout << tree.lower_bound(3)->key << std::endl;
   //tree.dump_tree();
