@@ -157,14 +157,17 @@ public: // модификаторы
         x->parent = y;
     }
 
-    void tree_insert(const KeyT key) {
+    int tree_insert(const KeyT key) {
         NodeIt new_node = std::prev(node_storage.end());
         NodeIt y = nil;
         NodeIt x = root;
 
         while (x != nil) {
             y = x;
-            assert((key != x->key) && "oops, repetitive keys aren't expected");
+            if (key == x->key) {
+                //repetitive keys
+                return 0;
+            }
             if (key < x->key)
                 x = x->left;
             else
@@ -177,6 +180,8 @@ public: // модификаторы
             y->left = new_node;
         else 
             y->right = new_node;
+        
+        return 1;
     }
 
     void tree_balance() {
@@ -224,8 +229,8 @@ public: // модификаторы
     //insert new node with given key and balance red-black tree
     void rb_insert(const KeyT key) {
         node_storage.emplace_back(key, nil); //new_node is always in the end of node_storage
-        tree_insert(key);
-        tree_balance();
+        if (tree_insert(key))
+            tree_balance();
     }
 
     void print_2(NodeIt x, int space) {
