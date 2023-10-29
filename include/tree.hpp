@@ -6,6 +6,9 @@
 #include <iterator>
 #include <cassert>
 
+//TODO mydistance, e2e and unit tests, readme
+//bound_helper needs to be fixed
+
 namespace Trees {
 
 enum class color_type { red, black };
@@ -42,33 +45,39 @@ public:
 
 public: // селекторы
 
-    void inorderTraversalHelper(NodeIt node, const KeyT key, NodeIt &res, int mode) const {
-        if (node != nil) {
-            if (key < node->key)
-                inorderTraversalHelper(node->left, key, res, mode);
+    void bound_helper(NodeIt node, const KeyT key, NodeIt &res, int mode) const {
+        if (node == nil)
+            return;
+
+        if (key == node->key) {
             if (mode == 0) {
                 //lower_bound()
-                if ((node->key >= key) && (res == nil)) {
-                    res = node;
-                    return;
-                }  
-            }
-            if (mode == 1) {
+                res = node;
+                return;
+            } else if (mode == 1) {
                 //upper_bound()
-                if ((node->key > key) && (res == nil)) {
-                    res = node;
-                    return;
-                }  
-            }       
-            if(key > node->key)
-                inorderTraversalHelper(node->right, key, res, mode);
+                bound_helper(node->right, key, res, mode);
+                return;
+            } else
+                assert("fix your code now!");
+        } else if (key < node->key) {
+            bound_helper(node->left, key, res, mode);
+            if (res == nil) {
+                //nothing better was found
+                res = node;
+            }
+            return;
+        } else if (key > node->key) {
+            bound_helper(node->right, key, res, mode);
+            if (res == nil)
+                //nu sorry, nothing to offer
+            return;
         }
-        return;
     }
 
     NodeIt lower_bound(const KeyT key) const {
         NodeIt res = nil;
-        inorderTraversalHelper(root, key, res, 0);
+        bound_helper(root, key, res, 0);
 
         return res;
     }
@@ -76,9 +85,26 @@ public: // селекторы
 
     NodeIt upper_bound(const KeyT key) const {
         NodeIt res = nil;
-        inorderTraversalHelper(root, key, res, 1);
+        bound_helper(root, key, res, 1);
 
         return res;
+    }
+
+   /* void inorder_traversal(NodeIt node, NodeIt start, NodeIt fin, int &count) {
+        if (node == nil)
+            return;
+
+        inorderTraversal(node->left, start, fin, count);
+
+        if (node->key >= low && node->data <= high)
+            count++;
+
+        inorderTraversal(node->right, low, high, count);
+    }
+
+    int mydistance(NodeIt start, NodeIt fin) {
+        int count = 0;
+        inorder_traversal(root, start, fin, count); 
     }
 
     int range_query(const KeyT fst, const KeyT snd) const {
@@ -86,7 +112,7 @@ public: // селекторы
         NodeIt fin = upper_bound(snd);
         //return mydistance(start, fin);
         return 0;
-    }
+    }*/
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы
 
