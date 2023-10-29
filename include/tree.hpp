@@ -2,12 +2,14 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <vector>
+#include <list>
 #include <iterator>
 #include <cassert>
 
 //TODO mydistance, e2e and unit tests, readme
-//bound_helper needs to be fixed
+
+//to store in each node the size of subtrees
+
 
 namespace Trees {
 
@@ -18,19 +20,19 @@ class Search_RBTree {
 
     struct Node {
         KeyT key;
-        typename std::vector<Node>::iterator parent, left, right;
+        typename std::list<Node>::iterator parent, left, right;
         //int black_height = 0;
         color_type color = color_type::red;
 
         Node() = default;
-        Node(KeyT key_, typename std::vector<Node>::iterator default_it) : key(key_), parent(default_it),
+        Node(KeyT key_, typename std::list<Node>::iterator default_it) : key(key_), parent(default_it),
                                                             left(default_it), right(default_it) {};
     };
 
 
-    using NodeIt = typename std::vector<Node>::iterator;
+    using NodeIt = typename std::list<Node>::iterator;
 
-    std::vector<Node> node_storage;
+    std::list<Node> node_storage;
     NodeIt nil = node_storage.end(); //leaves in tree
     NodeIt root = nil;
 
@@ -90,28 +92,17 @@ public: // селекторы
         return res;
     }
 
-   /* void inorder_traversal(NodeIt node, NodeIt start, NodeIt fin, int &count) {
-        if (node == nil)
-            return;
+    /*int mydistance(const NodeIt start, const NodeIt fin) const{
+        if (start == nil)
+            return 0;
 
-        inorderTraversal(node->left, start, fin, count);
-
-        if (node->key >= low && node->data <= high)
-            count++;
-
-        inorderTraversal(node->right, low, high, count);
-    }
-
-    int mydistance(NodeIt start, NodeIt fin) {
-        int count = 0;
-        inorder_traversal(root, start, fin, count); 
+        distance_helper(root, start, fin);
     }
 
     int range_query(const KeyT fst, const KeyT snd) const {
         NodeIt start = lower_bound(fst);
         NodeIt fin = upper_bound(snd);
-        //return mydistance(start, fin);
-        return 0;
+        return mydistance(start, fin);
     }*/
     //int distance(Node* fst, Node* snd) const;
 public: // модификаторы
@@ -157,17 +148,14 @@ public: // модификаторы
         x->parent = y;
     }
 
-    int tree_insert(const KeyT key) {
+    void tree_insert(const KeyT key) {
         NodeIt new_node = std::prev(node_storage.end());
         NodeIt y = nil;
         NodeIt x = root;
 
         while (x != nil) {
-            y = x;
-            if (key == x->key) {
-                //repetitive keys
-                return 0;
-            }
+            y = x;           
+            assert((key != x->key) && "oops, repetitive keys aren't expected");
             if (key < x->key)
                 x = x->left;
             else
@@ -180,8 +168,6 @@ public: // модификаторы
             y->left = new_node;
         else 
             y->right = new_node;
-        
-        return 1;
     }
 
     void tree_balance() {
@@ -228,9 +214,9 @@ public: // модификаторы
 
     //insert new node with given key and balance red-black tree
     void rb_insert(const KeyT key) {
-        node_storage.emplace_back(key, nil); //new_node is always in the end of node_storage
-        if (tree_insert(key))
-            tree_balance();
+        node_storage.emplace_back(key, nil); 
+        tree_insert(key);
+        tree_balance();
     }
 
     void print_2(NodeIt x, int space) {

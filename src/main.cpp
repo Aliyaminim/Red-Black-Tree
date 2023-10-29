@@ -32,6 +32,7 @@ int main() {
   tree.print();
   
   std::cout << tree.upper_bound(5)->key << std::endl;
+  //std::cout << tree.range_query(1, 5) << std::endl;
 
   //std::cout << tree.lower_bound(3)->key << std::endl;
   //tree.dump_tree();
