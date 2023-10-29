@@ -22,6 +22,8 @@ class Search_RBTree {
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
         //int black_height = 0;
+        int size_of_childtree_left = 0;
+        int size_of_childtree_right = 0;
         color_type color = color_type::red;
 
         Node() = default;
@@ -92,19 +94,65 @@ public: // селекторы
         return res;
     }
 
-    /*int mydistance(const NodeIt start, const NodeIt fin) const{
+    int size_of_childtree(NodeIt node) {
+        if (node == nil) {
+            return 0;
+        }
+        return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
+    }
+
+    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const {             
+        if ((start->key <= curr_root->key) && (curr_root->key <= fin->key))
+            return curr_root;
+        else if ((start->key < curr_root->key) && (fin->key < curr_root->key))
+            return common_ancestor(start, fin, curr_root->left);
+        else if ((curr_root->key < start->key) && (curr_root->key < fin->key))
+            return common_ancestor(start, fin, curr_root->right);
+        else 
+            assert("fix your code now!");
+    }
+
+    /*int mydistance(const NodeIt start, const NodeIt fin) const {
         if (start == nil)
             return 0;
+        int dist = size_of_childtree(start->right);
+        if (fin != nil)
+            dist += size_of_childtree(fin->left);
+        
+        NodeIt anc = common_ancestor(start, fin, root);
+        if (anc == start) {
+            while (anc != fin) {
+            y = x;           
+            assert((key != x->key) && "oops, repetitive keys aren't expected");
+            if (key < x->key)
+                x = x->left;
+            else
+                x = x->right;
+            }
 
-        distance_helper(root, start, fin);
-    }
+        } else if (anc == fin) {
+
+        } else {
+
+        }
+
+        if (start != anc) {
+
+        } else {}
+        if (fin != anc) {
+
+        } else {}
+
+
+        return dist;
+    }*/
 
     int range_query(const KeyT fst, const KeyT snd) const {
         NodeIt start = lower_bound(fst);
         NodeIt fin = upper_bound(snd);
         return mydistance(start, fin);
-    }*/
-    //int distance(Node* fst, Node* snd) const;
+    }
+
 public: // модификаторы
 
 /* right_rotate(x)
@@ -228,9 +276,10 @@ public: // модификаторы
                 std::cout << " ";
             std::cout << x->key;
             if (x->color == color_type::black)
-                std::cout << "b" << std::endl;
+                std::cout << "b" << x->size_of_childtree_left << x->size_of_childtree_right << std::endl;
             else
-                std::cout << "r" << std::endl;
+                std::cout << "r" << x->size_of_childtree_left << x->size_of_childtree_right << std::endl;
+            
             print_2(x->left, space);
         }
     }
