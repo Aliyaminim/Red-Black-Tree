@@ -5,6 +5,7 @@
 #include <list>
 #include <iterator>
 #include <cassert>
+#include <climits>
 
 //TODO mydistance, e2e and unit tests, readme
 
@@ -44,6 +45,7 @@ public:
         node_storage.emplace_back();
         nil = std::prev(node_storage.end());
         nil->color = color_type::black; //constructing leaves in tree
+        nil->key = INT_MAX;
         root = nil;
     }
 
@@ -86,7 +88,6 @@ public: // селекторы
         return res;
     }
 
-
     NodeIt upper_bound(const KeyT key) const {
         NodeIt res = nil;
         bound_helper(root, key, res, 1);
@@ -94,7 +95,7 @@ public: // селекторы
         return res;
     }
 
-    int size_of_childtree(NodeIt node) {
+    int size_of_childtree(NodeIt node) const{
         if (node == nil) {
             return 0;
         }
@@ -112,40 +113,51 @@ public: // селекторы
             assert("fix your code now!");
     }
 
-    /*int mydistance(const NodeIt start, const NodeIt fin) const {
+    int mydistance(const NodeIt start, const NodeIt fin) const {
         if (start == nil)
             return 0;
-        int dist = size_of_childtree(start->right);
-        if (fin != nil)
-            dist += size_of_childtree(fin->left);
+
+        int dist = 0;
         
         NodeIt anc = common_ancestor(start, fin, root);
-        if (anc == start) {
-            while (anc != fin) {
-            y = x;           
-            assert((key != x->key) && "oops, repetitive keys aren't expected");
-            if (key < x->key)
-                x = x->left;
-            else
-                x = x->right;
+        NodeIt i = anc;
+
+        while (i != start) {
+            if (start->key < i->key) {
+                if (i != anc)
+                    dist += size_of_childtree(i->right);
+
+                i = i->left;
+                dist++;
+            } else {
+                i = i->right;
+                dist++;
             }
-
-        } else if (anc == fin) {
-
-        } else {
-
         }
 
-        if (start != anc) {
+        if (start != anc)
+            dist += size_of_childtree(start->right);
 
-        } else {}
-        if (fin != anc) {
+        i = anc;
+        while (i != fin) {
+            if (fin->key >= i->key) {
+                if (i != anc)
+                    dist += size_of_childtree(i->left);
 
-        } else {}
-
-
+                i = i->right;         
+                if (i->key <= fin->key)
+                    dist++;
+            } else {
+                i = i->left;
+                if (i->key <= fin->key)
+                    dist++;
+            }
+        }
+        if (fin != anc && fin != nil)
+            dist += size_of_childtree(fin->left);
+        
         return dist;
-    }*/
+    }
 
     int range_query(const KeyT fst, const KeyT snd) const {
         NodeIt start = lower_bound(fst);
