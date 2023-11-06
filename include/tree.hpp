@@ -17,7 +17,7 @@ namespace Trees {
 enum class color_type { red, black };
 
 template <typename KeyT>
-class Search_RBTree {
+class Search_RBTree final {
 
     struct Node {
         KeyT key;
@@ -47,7 +47,7 @@ public:
         nil->color = color_type::black; //constructing leaves in tree
         nil->key = INT_MAX;
         root = nil;
-    }
+    }  
 
 public: // селекторы
 
@@ -128,10 +128,12 @@ public: // селекторы
                     dist += size_of_childtree(i->right);
 
                 i = i->left;
-                dist++;
+                if (i->key >= start->key)
+                    dist++;
             } else {
                 i = i->right;
-                dist++;
+                if (i->key >= start->key)
+                    dist++;
             }
         }
 
