@@ -22,9 +22,6 @@ class Search_RBTree final {
     struct Node {
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
-        //int black_height = 0;
-        int size_of_childtree_left = 0;
-        int size_of_childtree_right = 0;
         color_type color = color_type::red;
 
         Node() = default;
@@ -49,8 +46,29 @@ public:
         root = nil;
     }  
 
-public: // селекторы
+private:
 
+    int size_of_childtree(NodeIt node) const{
+        if (node == nil) {
+            return 0;
+        }
+        return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
+    }
+
+    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const {             
+        if ((start->key <= curr_root->key) && (curr_root->key <= fin->key))
+            return curr_root;
+        else if ((start->key < curr_root->key) && (fin->key < curr_root->key))
+            return common_ancestor(start, fin, curr_root->left);
+        else if ((curr_root->key < start->key) && (curr_root->key < fin->key))
+            return common_ancestor(start, fin, curr_root->right);
+        else {
+            assert("fix your code now!");
+            return nil;
+        }
+    }
+
+    //auxiliary function for lower_bound() and upper_bound()
     void bound_helper(NodeIt node, const KeyT key, NodeIt &res, int mode) const {
         if (node == nil)
             return;
@@ -76,10 +94,12 @@ public: // селекторы
         } else if (key > node->key) {
             bound_helper(node->right, key, res, mode);
             if (res == nil)
-                //nu sorry, nothing to offer
+                //nothing to offer
             return;
         }
     }
+
+public: //селекторы
 
     NodeIt lower_bound(const KeyT key) const {
         NodeIt res = nil;
@@ -93,24 +113,6 @@ public: // селекторы
         bound_helper(root, key, res, 1);
 
         return res;
-    }
-
-    int size_of_childtree(NodeIt node) const{
-        if (node == nil) {
-            return 0;
-        }
-        return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
-    }
-
-    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const {             
-        if ((start->key <= curr_root->key) && (curr_root->key <= fin->key))
-            return curr_root;
-        else if ((start->key < curr_root->key) && (fin->key < curr_root->key))
-            return common_ancestor(start, fin, curr_root->left);
-        else if ((curr_root->key < start->key) && (curr_root->key < fin->key))
-            return common_ancestor(start, fin, curr_root->right);
-        else 
-            assert("fix your code now!");
     }
 
     int mydistance(const NodeIt start, const NodeIt fin) const {
@@ -167,6 +169,28 @@ public: // селекторы
         return mydistance(start, fin);
     }
 
+private: 
+
+    bool is_left_child(const NodeIt node) const {
+        assert((node != nil) && (node->parent != nil));
+        return node == node->parent->left;
+    }
+
+    bool is_red(const NodeIt node) const {
+        return node->color == color_type::red;
+    }
+
+    NodeIt grandparent(const NodeIt node) const {
+        return node->parent->parent;
+    }
+
+    NodeIt uncle(const NodeIt node) const {
+        if (is_left_child(node))
+            return node->parent->right;
+        else 
+            return node->parent->left;
+    }
+
 public: // модификаторы
 
 /* right_rotate(x)
@@ -178,35 +202,54 @@ public: // модификаторы
 */
     void right_rotate(NodeIt x) {
         NodeIt y = x->left;
-        x->left = y->right;
+
+        //set new x's left child
+        x->left = y->right; 
         if(y->right != nil)
             y->right->parent = x;
         
-        y->parent = x->parent;
+        //set new y's parent 
+        y->parent = x->parent; 
         if(x->parent == nil)
             root = y;
-        else if (x == x->parent->left)
+        else if (is_left_child(x))
             x->parent->left = y;
         else    
             x->parent->right = y;
+
+        //set new y's right child
         y->right = x;
+
+        //set new x's parent
         x->parent = y;
     }
 
+/* right_rotate(y)
+    |       |
+    y  ==>  x  
+   /         \
+  x   <==     y
+  left_rotate(x)
+*/
     void left_rotate(NodeIt x) {
         NodeIt y = x->right;
+        //set new x's right child
         x->right = y->left;
         if (y->left != nil)
             y->left->parent = x;
         
+        //set new y's parent
         y->parent = x->parent;
         if (x->parent == nil)
             root = y;
-        else if (x == x->parent->left)
+        else if (is_left_child(x))
             x->parent->left = y;
         else 
             x->parent->right = y;
+
+        //set new y's left child
         y->left = x;
+        //set new x's parent
         x->parent = y;
     }
 
@@ -236,39 +279,29 @@ public: // модификаторы
         NodeIt new_node = std::prev(node_storage.end());
         NodeIt y = nil;
         NodeIt z = new_node;
-        while (z->parent->color == color_type::red) {
-            if (z->parent == z->parent->parent->left) {
-                y = z->parent->parent->right;
-                if (y->color == color_type::red) {
-                    z->parent->color = color_type::black;
-                    y->color = color_type::black;
-                    z->parent->parent->color = color_type::red;
-                    z = z->parent->parent;
-                } else {
-                    if (z == z->parent->right) {
-                        z = z->parent;
-                        left_rotate(z);
-                    }
-                    z->parent->color = color_type::black;
-                    z->parent->parent->color = color_type::red;
-                    right_rotate(z->parent->parent);
-                }
+        while (is_red(z->parent)) {
+            y = uncle(z->parent);
+            if (is_red(y)) {
+                z->parent->color = color_type::black;
+                y->color = color_type::black;
+                grandparent(z)->color = color_type::red;
+                z = grandparent(z);
             } else {
-                y = z->parent->parent->left;
-                if (y->color == color_type::red) {
-                    z->parent->color = color_type::black;
-                    y->color = color_type::black;
-                    z->parent->parent->color = color_type::red;
-                    z = z->parent->parent;
-                } else {
-                    if (z == z->parent->left) {
-                        z = z->parent;
-                        right_rotate(z);
-                    }
-                    z->parent->color = color_type::black;
-                    z->parent->parent->color = color_type::red;
-                    left_rotate(z->parent->parent);
+                NodeIt tmp = z->parent;
+                if (is_left_child(z->parent) && !is_left_child(z)) {
+                    z = z->parent;
+                    left_rotate(z);
+                } else if (!is_left_child(z->parent) && is_left_child(z)) {
+                    z = z->parent;
+                    right_rotate(z);
                 }
+                z->parent->color = color_type::black;
+                grandparent(z)->color = color_type::red;
+
+                if (is_left_child(tmp))
+                    right_rotate(grandparent(z));
+                else
+                    left_rotate(grandparent(z));
             }
         } //while
         root->color = color_type::black;
@@ -290,9 +323,9 @@ public: // модификаторы
                 std::cout << " ";
             std::cout << x->key;
             if (x->color == color_type::black)
-                std::cout << "b" << x->size_of_childtree_left << x->size_of_childtree_right << std::endl;
+                std::cout << "b" << std::endl;
             else
-                std::cout << "r" << x->size_of_childtree_left << x->size_of_childtree_right << std::endl;
+                std::cout << "r" << std::endl;
             
             print_2(x->left, space);
         }
