@@ -1,11 +1,11 @@
 # Red-Black-Tree
-Project name: Red-black tree
+Project name: Red-black Tree
 
 Contributors: Minimullina Aliya
 
 To install and run the code, follow these steps:
 
-    git clone 
+    git clone https://github.com/Aliyaminim/Red-Black-Tree
     cd Red-Black-Tree
     bash run.sh
     cd test
