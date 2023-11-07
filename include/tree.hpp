@@ -7,11 +7,6 @@
 #include <cassert>
 #include <climits>
 
-//TODO mydistance, e2e and unit tests, readme
-
-//to store in each node the size of subtrees
-
-
 namespace Trees {
 
 enum class color_type { red, black };

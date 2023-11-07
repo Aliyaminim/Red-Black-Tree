@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#include <unordered_map>
 #include "tree.hpp"
 
 namespace {
@@ -10,6 +11,7 @@ namespace {
 
 int main() {
   Trees::Search_RBTree<int> tree{};
+  std::unordered_map<int, int> hash_input;
   
   for (;;) {
     char c;
@@ -20,7 +22,10 @@ int main() {
       int value;
       std::cin >> value;
       assert(std::cin.good());
-      tree.rb_insert(value);
+      if (hash_input.find(value) == hash_input.end()) {
+        tree.rb_insert(value);
+        hash_input.emplace(value, value);
+      }
       //tree.print();
     }
     if (c == QUERY) {
