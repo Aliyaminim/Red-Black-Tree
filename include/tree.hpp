@@ -159,8 +159,14 @@ public: //селекторы
     }
 
     int range_query(const KeyT fst, const KeyT snd) const {
-        NodeIt start = lower_bound(fst);
-        NodeIt fin = upper_bound(snd);
+        NodeIt start, fin;
+        if (fst <= snd) {         
+            start = lower_bound(fst);
+            fin = upper_bound(snd);
+        } else {    
+            start = lower_bound(snd);
+            fin = upper_bound(fst);
+        }
         return mydistance(start, fin);
     }
 
