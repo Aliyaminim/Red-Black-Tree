@@ -96,6 +96,7 @@ private:
 
 public: //селекторы
 
+    //not less than key
     NodeIt lower_bound(const KeyT key) const {
         NodeIt res = nil;
         bound_helper(root, key, res, 0);
@@ -103,6 +104,7 @@ public: //селекторы
         return res;
     }
 
+    //greater
     NodeIt upper_bound(const KeyT key) const {
         NodeIt res = nil;
         bound_helper(root, key, res, 1);
@@ -159,12 +161,16 @@ public: //селекторы
     }
 
     int range_query(const KeyT fst, const KeyT snd) const {
-        if(fst > snd)
+        if(fst >= snd)
             return 0;
 
         NodeIt start = lower_bound(fst);
-        NodeIt fin = upper_bound(snd);   
-        return mydistance(start, fin);
+        NodeIt fin = upper_bound(snd); 
+
+        int dist = mydistance(start, fin);
+        if ((start != nil) && (start->key == fst))
+            dist--;
+        return dist; 
     }
 
 private: 
