@@ -165,12 +165,8 @@ public: //селекторы
             return 0;
 
         NodeIt start = lower_bound(fst);
-        NodeIt fin = upper_bound(snd); 
-
-        int dist = mydistance(start, fin);
-        if ((start != nil) && (start->key == fst))
-            dist--;
-        return dist; 
+        NodeIt fin = upper_bound(snd);   
+        return mydistance(start, fin);
     }
 
 private: 

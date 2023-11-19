@@ -14,11 +14,7 @@ template <typename C, typename T> int range_query(const C &s, T fst, T snd) {
   using itt = typename C::iterator;
   itt start = s.lower_bound(fst);
   itt fin = s.upper_bound(snd);
-
-  int dist = std::distance(start, fin);
-  if (s.find(fst) != s.end())
-    dist--;
-  return dist;
+  return std::distance(start, fin);
 }
 
 int main() {
