@@ -78,7 +78,7 @@ private:
                 bound_helper(node->right, key, res, mode);
                 return;
             } else
-                assert("fix your code now!");
+                assert(0 && "fix your code now!");
         } else if (key < node->key) {
             bound_helper(node->left, key, res, mode);
             if (res == nil) {
@@ -314,7 +314,7 @@ public: // модификаторы
         tree_balance();
     }
 
-    void print_2(NodeIt x, int space) {
+    void print_2(NodeIt x, int space) const {
         if (x != nil) {
             space += 10;
             print_2(x->right, space);
@@ -331,7 +331,7 @@ public: // модификаторы
         }
     }
 
-    void print() {
+    void print() const {
         print_2(root, 0);
     }
 }; //class Search_RBTree
