@@ -5,6 +5,8 @@
 namespace {
   const char KEY = 'k';
   const char QUERY = 'q';
+  const char SELECT = 'm';
+  const char RANK = 'n';
 } //namespace
 
 template <typename C, typename T> int range_query(const C &s, T fst, T snd) {

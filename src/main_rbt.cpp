@@ -14,6 +14,7 @@ namespace {
 int main() {
   Trees::Search_RBTree<int> tree{};
   std::unordered_map<int, int> hash_input;
+  int ret = 0;
   
   for (;;) {
     char c;
@@ -44,17 +45,17 @@ int main() {
         std::cout << tree.select_ranked_elem(i) << " ";
       }
       catch(Trees::unknown &err) {
-        std::cerr << "error" << std::endl;
-        return 1;
+        std::cerr << "error ";
+        ret = 1;
       }
     }
     if (c == RANK) {
       int bound;
       std::cin >> bound;
       assert(std::cin.good());
-      std::cout << tree.key_rank(bound) - 1 << " ";
+      std::cout << tree.key_rank(bound) << " ";
     }
   }
   std::cout << std::endl;
-  return 0;
+  return ret;
 }

@@ -191,6 +191,7 @@ public: //селекторы
         return select_helper(i, root);
     }
 
+    //counts number of elements that are less than given key
     int key_rank(const KeyT key) const {
         NodeIt node_bound = lower_bound(key);
         if (node_bound == nil)
@@ -208,9 +209,9 @@ public: //селекторы
                 curr_root = curr_root->right;
             }
         }
-        rank += curr_root->left->subtree_size + 1;
+        rank += curr_root->left->subtree_size;
 
-        return rank;
+        return rank; 
     }
 
 private: 
