@@ -8,6 +8,11 @@
 
 namespace Trees {
 
+struct unknown : public std::runtime_error {
+    unknown(const char *message = "Given rank should be positive")
+              : std::runtime_error{message} {};
+};
+
 enum class color_type { red, black };
 
 template <typename KeyT>
@@ -173,6 +178,24 @@ public: //селекторы
         NodeIt start = lower_bound(fst);
         NodeIt fin = upper_bound(snd);   
         return mydistance(start, fin);
+    }
+
+    KeyT select_helper(int i, NodeIt curr_elem) {
+        if (i < 1)
+            throw unknown{};
+        int curr_rank = curr_elem->left->subtree_size + 1;
+        if (i == curr_rank)
+            return curr_elem->key;
+        else if (i < curr_rank)
+            return select_helper(i, curr_elem->left);
+        else 
+            return select_helper(i-curr_rank, curr_elem->right);
+    }
+
+    KeyT select_ranked_elem(int i) {
+        if (i > root->subtree_size) 
+            i = root->subtree_size;
+        return select_helper(i, root);
     }
 
 private: 
