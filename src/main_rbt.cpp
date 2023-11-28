@@ -44,8 +44,8 @@ int main() {
       try {
         std::cout << tree.select_ranked_elem(i) << " ";
       }
-      catch(Trees::unknown &err) {
-        std::cerr << "error ";
+      catch(Trees::unknown_query &err) {
+        std::cerr << err.what();
         ret = 1;
       }
     }

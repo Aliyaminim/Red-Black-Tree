@@ -8,8 +8,8 @@
 
 namespace Trees {
 
-struct unknown : public std::runtime_error {
-    unknown(const char *message = "Given rank should be positive")
+struct unknown_query : public std::runtime_error {
+    unknown_query(const char *message = "Given rank must be positive\n")
               : std::runtime_error{message} {};
 };
 
@@ -175,7 +175,7 @@ public: //селекторы
 
     KeyT select_helper(int i, NodeIt curr_elem) const {
         if (i < 1)
-            throw unknown{};
+            throw unknown_query{};
         int curr_rank = curr_elem->left->subtree_size + 1;
         if (i == curr_rank)
             return curr_elem->key;
