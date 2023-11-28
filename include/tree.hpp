@@ -49,13 +49,6 @@ public:
 
 private:
 
-    /*int size_of_childtree(NodeIt node) const{
-        if (node == nil) {
-            return 0;
-        }
-        return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
-    }*/
-
     NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const { 
         if (fin == nil) {
             if (start->key <= curr_root->key)
@@ -180,7 +173,7 @@ public: //селекторы
         return mydistance(start, fin);
     }
 
-    KeyT select_helper(int i, NodeIt curr_elem) {
+    KeyT select_helper(int i, NodeIt curr_elem) const {
         if (i < 1)
             throw unknown{};
         int curr_rank = curr_elem->left->subtree_size + 1;
@@ -192,13 +185,13 @@ public: //селекторы
             return select_helper(i-curr_rank, curr_elem->right);
     }
 
-    KeyT select_ranked_elem(int i) {
+    KeyT select_ranked_elem(int i) const {
         if (i > root->subtree_size) 
             i = root->subtree_size;
         return select_helper(i, root);
     }
 
-    int key_rank(const KeyT key) {
+    int key_rank(const KeyT key) const {
         NodeIt node_bound = lower_bound(key);
         if (node_bound == nil)
             return root->subtree_size;
@@ -215,7 +208,7 @@ public: //селекторы
                 curr_root = curr_root->right;
             }
         }
-        rank += curr_root->left->subtree_size + 1; //including itself
+        rank += curr_root->left->subtree_size + 1;
 
         return rank;
     }

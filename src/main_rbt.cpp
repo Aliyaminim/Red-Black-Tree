@@ -7,6 +7,8 @@
 namespace {
   const char KEY = 'k';
   const char QUERY = 'q';
+  const char SELECT = 'm';
+  const char RANK = 'n';
 } //namespace
 
 int main() {
@@ -34,6 +36,25 @@ int main() {
       assert(std::cin.good());
       std::cout << tree.range_query(fst, snd) << " ";
     }
+    if (c == SELECT) {
+      int i;
+      std::cin >> i;
+      assert(std::cin.good());
+      try {
+        std::cout << tree.select_ranked_elem(i) << " ";
+      }
+      catch(Trees::unknown &err) {
+        std::cerr << "error" << std::endl;
+        return 1;
+      }
+    }
+    if (c == RANK) {
+      int bound;
+      std::cin >> bound;
+      assert(std::cin.good());
+      std::cout << tree.key_rank(bound) - 1 << " ";
+    }
   }
   std::cout << std::endl;
+  return 0;
 }
