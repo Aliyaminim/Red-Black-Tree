@@ -198,6 +198,24 @@ public: //селекторы
         return select_helper(i, root);
     }
 
+    int key_rank(const KeyT key) {
+        KeyT key_bound = lower_bound(key)->key;
+        NodeIt curr_root = root;
+        int rank = 0;
+
+        while (key_bound != curr_root->key) {
+            if (key_bound < curr_root->key) {
+                curr_root = curr_root->left;
+            } else if (curr_root->key < key_bound) {
+                rank += curr_root->left->subtree_size + 1;
+                curr_root = curr_root->right;
+            }
+        }
+        rank += curr_root->left->subtree_size + 1; //including itself
+
+        return rank;
+    }
+
 private: 
 
     bool is_left_child(const NodeIt node) const {
