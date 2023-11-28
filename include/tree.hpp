@@ -49,12 +49,12 @@ public:
 
 private:
 
-    int size_of_childtree(NodeIt node) const{
+    /*int size_of_childtree(NodeIt node) const{
         if (node == nil) {
             return 0;
         }
         return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
-    }
+    }*/
 
     NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const { 
         if (fin == nil) {
@@ -132,7 +132,7 @@ public: //селекторы
         while (i != start) {
             if (start->key < i->key) {
                 if (i != anc)
-                    dist += size_of_childtree(i->right);
+                    dist += i->right->subtree_size;
 
                 i = i->left;
                 if (i->key >= start->key)
@@ -145,14 +145,14 @@ public: //селекторы
         }
 
         if (start != anc)
-            dist += size_of_childtree(start->right);
+            dist += start->right->subtree_size;
 
         if (fin != nil) {
             i = anc;
             while (i != fin) {
                 if (fin->key >= i->key) {
                     if (i != anc)
-                        dist += size_of_childtree(i->left);
+                        dist += i->left->subtree_size;
 
                     i = i->right;         
                     if (i->key <= fin->key)
@@ -164,9 +164,9 @@ public: //селекторы
                 }
             }
             if (fin != anc && fin != nil)
-                dist += size_of_childtree(fin->left);
+                dist += fin->left->subtree_size;
         } else    
-            dist += size_of_childtree(anc->right) + 1;
+            dist += anc->right->subtree_size + 1;
         
         return dist;
     }
@@ -199,7 +199,11 @@ public: //селекторы
     }
 
     int key_rank(const KeyT key) {
-        KeyT key_bound = lower_bound(key)->key;
+        NodeIt node_bound = lower_bound(key);
+        if (node_bound == nil)
+            return root->subtree_size;
+
+        KeyT key_bound = node_bound->key;
         NodeIt curr_root = root;
         int rank = 0;
 
@@ -269,6 +273,9 @@ public: // модификаторы
 
         //set new x's parent
         x->parent = y;
+
+        y->subtree_size = x->subtree_size;
+        x->subtree_size = x->left->subtree_size + x->right->subtree_size + 1;
     }
 
 /* right_rotate(y)
@@ -298,6 +305,9 @@ public: // модификаторы
         y->left = x;
         //set new x's parent
         x->parent = y;
+
+        y->subtree_size = x->subtree_size;
+        x->subtree_size = x->left->subtree_size + x->right->subtree_size + 1;
     }
 
     void tree_insert(const KeyT key) {
@@ -308,6 +318,7 @@ public: // модификаторы
         while (x != nil) {
             y = x;           
             assert((key != x->key) && "oops, repetitive keys aren't expected");
+            x->subtree_size++;
             if (key < x->key)
                 x = x->left;
             else
