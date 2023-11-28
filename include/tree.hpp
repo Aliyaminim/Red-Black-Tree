@@ -5,7 +5,6 @@
 #include <list>
 #include <iterator>
 #include <cassert>
-#include <climits>
 
 namespace Trees {
 
@@ -18,10 +17,14 @@ class Search_RBTree final {
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
         color_type color = color_type::red;
+        int subtree_size = 1;
 
-        Node() = default;
-        Node(KeyT key_, typename std::list<Node>::iterator default_it) : key(key_), parent(default_it),
-                                                            left(default_it), right(default_it) {};
+        Node(KeyT key_, typename std::list<Node>::iterator default_it) : key(key_), parent(default_it), 
+                    left(default_it), right(default_it) {};
+        Node(color_type color_, int sb_size) {
+            color = color_;
+            subtree_size = sb_size;
+        }
     };
 
 
@@ -34,10 +37,8 @@ class Search_RBTree final {
 public:
     //constructor
     Search_RBTree() {
-        node_storage.emplace_back();
-        nil = std::prev(node_storage.end());
-        nil->color = color_type::black; //constructing leaves in tree
-        nil->key = INT_MAX;
+        node_storage.emplace_back(color_type::black, 0);
+        nil = std::prev(node_storage.end()); //leaves in tree
         root = nil;
     }  
 
@@ -50,17 +51,22 @@ private:
         return size_of_childtree(node->left) + 1 + size_of_childtree(node->right);
     }
 
-    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const {             
+    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const { 
+        if (fin == nil) {
+            if (start->key <= curr_root->key)
+                return curr_root;
+            else 
+                return common_ancestor(start, fin, curr_root->right);
+        }
+
         if ((start->key <= curr_root->key) && (curr_root->key <= fin->key))
             return curr_root;
         else if ((start->key < curr_root->key) && (fin->key < curr_root->key))
             return common_ancestor(start, fin, curr_root->left);
         else if ((curr_root->key < start->key) && (curr_root->key < fin->key))
             return common_ancestor(start, fin, curr_root->right);
-        else {
-            assert("fix your code now!");
+        else 
             return nil;
-        }
     }
 
     //auxiliary function for lower_bound() and upper_bound()
@@ -77,8 +83,7 @@ private:
                 //upper_bound()
                 bound_helper(node->right, key, res, mode);
                 return;
-            } else
-                assert(0 && "fix your code now!");
+            }
         } else if (key < node->key) {
             bound_helper(node->left, key, res, mode);
             if (res == nil) {
@@ -100,7 +105,6 @@ public: //селекторы
     NodeIt lower_bound(const KeyT key) const {
         NodeIt res = nil;
         bound_helper(root, key, res, 0);
-
         return res;
     }
 
@@ -108,7 +112,6 @@ public: //селекторы
     NodeIt upper_bound(const KeyT key) const {
         NodeIt res = nil;
         bound_helper(root, key, res, 1);
-
         return res;
     }
 
@@ -139,23 +142,26 @@ public: //селекторы
         if (start != anc)
             dist += size_of_childtree(start->right);
 
-        i = anc;
-        while (i != fin) {
-            if (fin->key >= i->key) {
-                if (i != anc)
-                    dist += size_of_childtree(i->left);
+        if (fin != nil) {
+            i = anc;
+            while (i != fin) {
+                if (fin->key >= i->key) {
+                    if (i != anc)
+                        dist += size_of_childtree(i->left);
 
-                i = i->right;         
-                if (i->key <= fin->key)
-                    dist++;
-            } else {
-                i = i->left;
-                if (i->key <= fin->key)
-                    dist++;
+                    i = i->right;         
+                    if (i->key <= fin->key)
+                        dist++;
+                } else {
+                    i = i->left;
+                    if (i->key <= fin->key)
+                        dist++;
+                }
             }
-        }
-        if (fin != anc && fin != nil)
-            dist += size_of_childtree(fin->left);
+            if (fin != anc && fin != nil)
+                dist += size_of_childtree(fin->left);
+        } else    
+            dist += size_of_childtree(anc->right) + 1;
         
         return dist;
     }
