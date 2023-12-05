@@ -68,49 +68,40 @@ private:
     }
 
     //auxiliary function for lower_bound() and upper_bound()
-    void bound_helper(NodeIt node, const KeyT key, NodeIt &res, int mode) const {
+    NodeIt bound_helper(NodeIt node, const KeyT key, int mode) const {
         if (node == nil)
-            return;
+            return nil;
 
         if (key == node->key) {
             if (mode == 0) {
                 //lower_bound()
-                res = node;
-                return;
+                return node;
             } else if (mode == 1) {
                 //upper_bound()
-                bound_helper(node->right, key, res, mode);
-                return;
+                return bound_helper(node->right, key, mode);
             }
         } else if (key < node->key) {
-            bound_helper(node->left, key, res, mode);
+            NodeIt res = bound_helper(node->left, key, mode);
             if (res == nil) {
                 //nothing better was found
                 res = node;
             }
-            return;
-        } else if (key > node->key) {
-            bound_helper(node->right, key, res, mode);
-            if (res == nil)
-                //nothing to offer
-            return;
-        }
+            return res;
+        } 
+            
+        return bound_helper(node->right, key, mode); 
     }
 
 public: //селекторы
 
     //not less than key
     NodeIt lower_bound(const KeyT key) const {
-        NodeIt res = nil;
-        bound_helper(root, key, res, 0);
-        return res;
+        return bound_helper(root, key, 0);
     }
 
     //greater
     NodeIt upper_bound(const KeyT key) const {
-        NodeIt res = nil;
-        bound_helper(root, key, res, 1);
-        return res;
+        return bound_helper(root, key, 1);
     }
 
     int mydistance(const NodeIt start, const NodeIt fin) const {
@@ -305,6 +296,7 @@ public: // модификаторы
     }
 
     void tree_insert(const KeyT key) {
+        node_storage.emplace_back(key, nil); 
         NodeIt new_node = std::prev(node_storage.end());
         NodeIt y = nil;
         NodeIt x = root;
@@ -328,9 +320,9 @@ public: // модификаторы
     }
 
     void tree_balance() {
-        NodeIt new_node = std::prev(node_storage.end());
         NodeIt y = nil;
-        NodeIt z = new_node;
+        NodeIt z = std::prev(node_storage.end());
+
         while (is_red(z->parent)) {
             y = uncle(z->parent);
             if (is_red(y)) {
@@ -361,7 +353,6 @@ public: // модификаторы
 
     //insert new node with given key and balance red-black tree
     void rb_insert(const KeyT key) {
-        node_storage.emplace_back(key, nil); 
         tree_insert(key);
         tree_balance();
     }
