@@ -17,19 +17,19 @@ enum class color_type { red, black };
 
 template <typename KeyT>
 class Search_RBTree final {
+private:
 
     struct Node {
+    //private:
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
-        color_type color = color_type::red;
-        int subtree_size = 1;
+        color_type color;
+        int subtree_size;
 
-        Node(KeyT key_, typename std::list<Node>::iterator default_it) : key(key_), parent(default_it), 
-                    left(default_it), right(default_it) {};
-        Node(color_type color_, int sb_size) {
-            color = color_;
-            subtree_size = sb_size;
-        }
+    public:
+        Node(KeyT key_, typename std::list<Node>::iterator default_it, color_type color_ = color_type::red, int subtree_size_ = 1) : 
+            key(key_), parent(default_it), left(default_it), right(default_it), color(color_), subtree_size(subtree_size_) {};
+
     };
 
 
@@ -42,7 +42,7 @@ class Search_RBTree final {
 public:
     //constructor
     Search_RBTree() {
-        node_storage.emplace_back(color_type::black, 0);
+        node_storage.emplace_back(KeyT{}, node_storage.end(), color_type::black, 0);
         nil = std::prev(node_storage.end()); //leaves in tree
         root = nil;
     }  
