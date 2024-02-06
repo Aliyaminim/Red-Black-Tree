@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include "tree.hpp"
 
+using namespace yLab;
+
 namespace {
   const char KEY = 'k';
   const char QUERY = 'q';
@@ -44,7 +46,7 @@ int main() {
       try {
         std::cout << tree.select_ranked_elem(i) << " ";
       }
-      catch(Trees::unknown_query &err) {
+      catch(unknown_query &err) {
         std::cerr << err.what();
         ret = 1;
       }

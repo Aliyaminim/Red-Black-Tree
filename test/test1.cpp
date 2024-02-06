@@ -2,6 +2,8 @@
 #include "tree.hpp"
 #include <cstdlib>
 
+using namespace yLab;
+
 TEST(Test_lowerbound, Test1) {
     Trees::Search_RBTree<int> tree{}; 
     int x = (rand() % 50) + 1;
