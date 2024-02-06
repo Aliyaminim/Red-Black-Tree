@@ -5,6 +5,7 @@
 #include <list>
 #include <iterator>
 #include <cassert>
+#include <utility>
 
 namespace yLab {
 struct unknown_query : public std::runtime_error {
@@ -47,7 +48,11 @@ public:
         node_storage.emplace_back(KeyT{}, node_storage.end(), color_type::black, 0);
         nil = std::prev(node_storage.end()); //leaves in tree
         root = nil;
-    }  
+    } 
+
+    //capacity 
+    bool empty() const noexcept { return root == nil; }
+    int size() const noexcept { return (empty()) ? 0 : root->subtree_size + 1; } 
 
 private:
 
@@ -70,34 +75,35 @@ private:
     }
 
     //auxiliary function for lower_bound() and upper_bound()
-    CNodeIt bound_helper(CNodeIt node, const KeyT key, bound_type mode) const {
-        if (node == nil)
-            return nil;
-
-        if (key < node->key) {
-            CNodeIt res = bound_helper(node->left, key, mode);
-            return (res == nil) ? node : res;
-        } else if (key > node->key) {
-            return bound_helper(node->right, key, mode); 
-        } else {
-           if (mode == bound_type::lwbound_mode) {
-                return node;
+    CNodeIt bound_impl(const KeyT key, bound_type mode) const {
+        CNodeIt res = nil;
+        CNodeIt node = root;
+        while (node != nil) {
+            if (key < node->key) {
+                res = std::exchange(node, node->left);
+            } else if (key > node->key) {
+                node = node->right; 
             } else {
-                return bound_helper(node->right, key, mode);
-            } 
+            if (mode == bound_type::lwbound_mode) {
+                    return node;
+                } else {
+                    node = node->right;
+                } 
+            }
         }
+        return res;
     }
 
 public: //селекторы
 
     //not less than key
     CNodeIt lower_bound(const KeyT key) const {
-        return bound_helper(root, key, bound_type::lwbound_mode);
+        return bound_impl(key, bound_type::lwbound_mode);
     }
 
     //greater
     CNodeIt upper_bound(const KeyT key) const {
-        return bound_helper(root, key, bound_type::upbound_mode);
+        return bound_impl(key, bound_type::upbound_mode);
     }
 
     int mydistance(const CNodeIt start, const CNodeIt fin) const {
