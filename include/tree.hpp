@@ -6,20 +6,25 @@
 #include <iterator>
 #include <cassert>
 
-namespace Trees {
-
+namespace yLab {
 struct unknown_query : public std::runtime_error {
     unknown_query(const char *message = "Given rank must be positive\n")
               : std::runtime_error{message} {};
 };
 
+namespace Trees {
+
 enum class color_type { red, black };
+enum class bound_type { 
+    lwbound_mode = 0,
+    upbound_mode = 1
+};
 
 template <typename KeyT>
 class Search_RBTree final {
 private:
 
-    struct Node {
+    struct Node final {
     //private:
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
@@ -32,8 +37,16 @@ private:
 
     };
 
-
     using NodeIt = typename std::list<Node>::iterator;
+    using CNodeIt = typename std::list<Node>::const_iterator;
+
+    /*class Node_Attorney final {
+    private:
+        static Key& data(Node &c) { return c.data; }
+        static int& key(Node &c) { return c.key; }
+
+        friend Search_RBTree;
+    };*/
 
     std::list<Node> node_storage;
     NodeIt nil = node_storage.end(); //leaves in tree
@@ -68,40 +81,34 @@ private:
     }
 
     //auxiliary function for lower_bound() and upper_bound()
-    NodeIt bound_helper(NodeIt node, const KeyT key, int mode) const {
+    NodeIt bound_helper(NodeIt node, const KeyT key, bound_type mode) const {
         if (node == nil)
             return nil;
 
-        if (key == node->key) {
-            if (mode == 0) {
-                //lower_bound()
-                return node;
-            } else if (mode == 1) {
-                //upper_bound()
-                return bound_helper(node->right, key, mode);
-            }
-        } else if (key < node->key) {
+        if (key < node->key) {
             NodeIt res = bound_helper(node->left, key, mode);
-            if (res == nil) {
-                //nothing better was found
-                res = node;
-            }
-            return res;
-        } 
-            
-        return bound_helper(node->right, key, mode); 
+            return (res == nil) ? node : res;
+        } else if (key > node->key) {
+            return bound_helper(node->right, key, mode); 
+        } else {
+           if (mode == bound_type::lwbound_mode) {
+                return node;
+            } else {
+                return bound_helper(node->right, key, mode);
+            } 
+        }
     }
 
 public: //селекторы
 
     //not less than key
     NodeIt lower_bound(const KeyT key) const {
-        return bound_helper(root, key, 0);
+        return bound_helper(root, key, bound_type::lwbound_mode);
     }
 
     //greater
     NodeIt upper_bound(const KeyT key) const {
-        return bound_helper(root, key, 1);
+        return bound_helper(root, key, bound_type::upbound_mode);
     }
 
     int mydistance(const NodeIt start, const NodeIt fin) const {
@@ -208,7 +215,8 @@ public: //селекторы
 private: 
 
     bool is_left_child(const NodeIt node) const {
-        assert((node != nil) && (node->parent != nil));
+        assert(node != nil);
+        assert(node->parent != nil);
         return node == node->parent->left;
     }
 
@@ -377,6 +385,8 @@ public: // модификаторы
     void print() const {
         print_2(root, 0);
     }
+    
 }; //class Search_RBTree
 } //namespace Trees
+} //namespace yLab
 
