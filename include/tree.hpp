@@ -23,15 +23,12 @@ enum class bound_type {
 template <typename KeyT>
 class Search_RBTree final {
 private:
-
     struct Node final {
-    //private:
         KeyT key;
         typename std::list<Node>::iterator parent, left, right;
         color_type color;
         int subtree_size;
 
-    public:
         Node(KeyT key_, typename std::list<Node>::iterator default_it, color_type color_ = color_type::red, int subtree_size_ = 1) : 
             key(key_), parent(default_it), left(default_it), right(default_it), color(color_), subtree_size(subtree_size_) {};
 
@@ -39,14 +36,6 @@ private:
 
     using NodeIt = typename std::list<Node>::iterator;
     using CNodeIt = typename std::list<Node>::const_iterator;
-
-    /*class Node_Attorney final {
-    private:
-        static Key& data(Node &c) { return c.data; }
-        static int& key(Node &c) { return c.key; }
-
-        friend Search_RBTree;
-    };*/
 
     std::list<Node> node_storage;
     NodeIt nil = node_storage.end(); //leaves in tree
@@ -62,7 +51,7 @@ public:
 
 private:
 
-    NodeIt common_ancestor(const NodeIt start, const NodeIt fin, const NodeIt curr_root) const { 
+    CNodeIt common_ancestor(const CNodeIt start, const CNodeIt fin, const CNodeIt curr_root) const { 
         if (fin == nil) {
             if (start->key <= curr_root->key)
                 return curr_root;
@@ -81,12 +70,12 @@ private:
     }
 
     //auxiliary function for lower_bound() and upper_bound()
-    NodeIt bound_helper(NodeIt node, const KeyT key, bound_type mode) const {
+    CNodeIt bound_helper(CNodeIt node, const KeyT key, bound_type mode) const {
         if (node == nil)
             return nil;
 
         if (key < node->key) {
-            NodeIt res = bound_helper(node->left, key, mode);
+            CNodeIt res = bound_helper(node->left, key, mode);
             return (res == nil) ? node : res;
         } else if (key > node->key) {
             return bound_helper(node->right, key, mode); 
@@ -102,23 +91,23 @@ private:
 public: //селекторы
 
     //not less than key
-    NodeIt lower_bound(const KeyT key) const {
+    CNodeIt lower_bound(const KeyT key) const {
         return bound_helper(root, key, bound_type::lwbound_mode);
     }
 
     //greater
-    NodeIt upper_bound(const KeyT key) const {
+    CNodeIt upper_bound(const KeyT key) const {
         return bound_helper(root, key, bound_type::upbound_mode);
     }
 
-    int mydistance(const NodeIt start, const NodeIt fin) const {
+    int mydistance(const CNodeIt start, const CNodeIt fin) const {
         if (start == nil)
             return 0;
 
         int dist = 0;
         
-        NodeIt anc = common_ancestor(start, fin, root);
-        NodeIt i = anc;
+        CNodeIt anc = common_ancestor(start, fin, root);
+        CNodeIt i = anc;
 
         while (i != start) {
             if (start->key < i->key) {
@@ -166,12 +155,12 @@ public: //селекторы
         if(fst >= snd)
             return 0;
 
-        NodeIt start = lower_bound(fst);
-        NodeIt fin = upper_bound(snd);   
+        const CNodeIt start = lower_bound(fst);
+        const CNodeIt fin = upper_bound(snd);   
         return mydistance(start, fin);
     }
 
-    KeyT select_helper(int i, NodeIt curr_elem) const {
+    KeyT select_helper(int i, const CNodeIt curr_elem) const {
         if (i < 1)
             throw unknown_query{};
         int curr_rank = curr_elem->left->subtree_size + 1;
@@ -191,12 +180,12 @@ public: //селекторы
 
     //counts number of elements that are less than given key
     int key_rank(const KeyT key) const {
-        NodeIt node_bound = lower_bound(key);
+        CNodeIt node_bound = lower_bound(key);
         if (node_bound == nil)
             return root->subtree_size;
 
         KeyT key_bound = node_bound->key;
-        NodeIt curr_root = root;
+        CNodeIt curr_root = root;
         int rank = 0;
 
         while (key_bound != curr_root->key) {
@@ -214,21 +203,21 @@ public: //селекторы
 
 private: 
 
-    bool is_left_child(const NodeIt node) const {
+    bool is_left_child(const CNodeIt node) const {
         assert(node != nil);
         assert(node->parent != nil);
         return node == node->parent->left;
     }
 
-    bool is_red(const NodeIt node) const {
+    bool is_red(const CNodeIt node) const {
         return node->color == color_type::red;
     }
 
-    NodeIt grandparent(const NodeIt node) const {
+    NodeIt grandparent(const CNodeIt node) const {
         return node->parent->parent;
     }
 
-    NodeIt uncle(const NodeIt node) const {
+    NodeIt uncle(const CNodeIt node) const {
         if (is_left_child(node))
             return node->parent->right;
         else 
@@ -339,7 +328,7 @@ public: // модификаторы
                 grandparent(z)->color = color_type::red;
                 z = grandparent(z);
             } else {
-                NodeIt tmp = z->parent;
+                CNodeIt tmp = z->parent;
                 if (is_left_child(z->parent) && !is_left_child(z)) {
                     z = z->parent;
                     left_rotate(z);
@@ -365,7 +354,7 @@ public: // модификаторы
         tree_balance();
     }
 
-    void print_2(NodeIt x, int space) const {
+    void print_2(const CNodeIt x, int space) const {
         if (x != nil) {
             space += 10;
             print_2(x->right, space);
@@ -385,7 +374,7 @@ public: // модификаторы
     void print() const {
         print_2(root, 0);
     }
-    
+
 }; //class Search_RBTree
 } //namespace Trees
 } //namespace yLab
