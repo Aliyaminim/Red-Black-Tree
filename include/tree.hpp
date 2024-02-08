@@ -13,6 +13,13 @@ struct unknown_query : public std::runtime_error {
               : std::runtime_error{message} {};
 };
 
+enum request_type: char {
+    KEY = 'k',
+    QUERY = 'q',
+    SELECT = 'm',
+    RANK = 'n'
+};
+
 namespace Trees {
 
 enum class color_type { red, black };
@@ -81,7 +88,7 @@ private:
         while (node != nil) {
             if (key < node->key) {
                 res = std::exchange(node, node->left);
-            } else if (key > node->key) {
+            } else if (node->key < key) {
                 node = node->right; 
             } else {
             if (mode == bound_type::lwbound_mode) {
@@ -158,7 +165,7 @@ public: //селекторы
     }
 
     int range_query(const KeyT fst, const KeyT snd) const {
-        if(fst >= snd)
+        if  (!(fst < snd)) 
             return 0;
 
         const CNodeIt start = lower_bound(fst);

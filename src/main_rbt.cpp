@@ -4,14 +4,7 @@
 #include <unordered_map>
 #include "tree.hpp"
 
-using namespace yLab;
-
-namespace {
-  const char KEY = 'k';
-  const char QUERY = 'q';
-  const char SELECT = 'm';
-  const char RANK = 'n';
-} //namespace
+using namespace yLab; 
 
 int main() {
   Trees::Search_RBTree<int> tree{};
@@ -32,14 +25,12 @@ int main() {
         hash_input.emplace(value, value);
       }
       //tree.print();
-    }
-    if (c == QUERY) {
+    } else if (c == QUERY) {
       int fst, snd;
       std::cin >> fst >> snd;
       assert(std::cin.good());
       std::cout << tree.range_query(fst, snd) << " ";
-    }
-    if (c == SELECT) {
+    } else if (c == SELECT) {
       int i;
       std::cin >> i;
       assert(std::cin.good());
@@ -50,8 +41,7 @@ int main() {
         std::cerr << err.what();
         ret = 1;
       }
-    }
-    if (c == RANK) {
+    } else if (c == RANK) {
       int bound;
       std::cin >> bound;
       assert(std::cin.good());

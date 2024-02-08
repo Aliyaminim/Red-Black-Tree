@@ -1,13 +1,9 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#include "tree.hpp"
 
-namespace {
-  const char KEY = 'k';
-  const char QUERY = 'q';
-  const char SELECT = 'm';
-  const char RANK = 'n';
-} //namespace
+using namespace yLab;
 
 template <typename C, typename T> int range_query(const C &s, T fst, T snd) {
   if (fst >= snd)
