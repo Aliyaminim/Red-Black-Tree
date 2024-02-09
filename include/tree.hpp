@@ -168,6 +168,22 @@ private:
     }
 
 public: 
+    CNodeIt find(const KeyT &key) const{
+        CNodeIt node = root;
+        while (node != nil) {
+            if (key < node->key)
+                node = node->left;
+            else if (node->key < key)
+                node = node->right;
+            else 
+                return node;
+        }
+
+        return nil;
+    }
+
+    bool contains (const KeyT &key) const { return find(key) != nil; }
+
     //not less than key
     CNodeIt lower_bound(const KeyT &key) const {
         return bound_impl(key, bound_type::lwbound_mode);
@@ -201,7 +217,7 @@ public:
             throw seg_fault{};
 
         int ith_smallest_el = i + 1;
-        return select_impl(kth_smallest_el);
+        return select_impl(ith_smallest_el);
     }
 
     //counts number of elements that are less than given key
