@@ -19,7 +19,6 @@ struct seg_fault : public std::runtime_error {
               : std::runtime_error{message} {};
 };
 
-
 namespace Trees {
 
 enum class color_type { red, black };
@@ -149,16 +148,23 @@ private:
         return dist;
     }
 
-    CNodeIt select_helper(int i, CNodeIt curr_elem) const {
-        if (i < 1)
+    CNodeIt select_impl(int i) const {
+        if ((i < 1) || (i > size()))
             throw unknown_query{};
-        int curr_rank = curr_elem->left->subtree_size + 1;
-        if (i == curr_rank)
-            return curr_elem;
-        else if (i < curr_rank)
-            return select_helper(i, curr_elem->left);
-        else 
-            return select_helper(i-curr_rank, curr_elem->right);
+
+        CNodeIt curr_elem = root;
+        while (curr_elem != nil) {
+            int curr_rank = curr_elem->left->subtree_size + 1;
+            if (i == curr_rank)
+                return curr_elem;
+            else if (i < curr_rank)
+                curr_elem = curr_elem->left;
+            else {
+                i -= curr_rank;
+                curr_elem = curr_elem->right;
+            }
+        }
+        throw unknown_query{};
     }
 
 public: 
@@ -187,14 +193,15 @@ public:
     KeyT select_ranked_elem(int i) const {
         if (i > root->subtree_size) 
             i = root->subtree_size;
-        return select_helper(i, root)->key;
+        return select_impl(i)->key;
     }
 
     CNodeIt operator[](int i) const {
         if (empty() || (i < 0) || (i >= size())) 
             throw seg_fault{};
-        
-        return select_helper(i + 1, root);
+
+        int ith_smallest_el = i + 1;
+        return select_impl(kth_smallest_el);
     }
 
     //counts number of elements that are less than given key
