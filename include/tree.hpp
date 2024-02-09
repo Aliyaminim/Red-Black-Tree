@@ -335,8 +335,8 @@ private:
         root->color = color_type::black;
     }
 
-    std::pair{CNodeIt, NodeIt} find_pos_to_insert(const KeyT key) {
-        CNodeIt parent = nil;
+    std::pair<NodeIt, NodeIt> find_pos_to_insert(const KeyT key) {
+        NodeIt parent = nil;
         NodeIt node = root;
 
         while (node != nil) {        
@@ -355,18 +355,18 @@ private:
         node_storage.emplace_back(key, nil); 
         NodeIt new_node = std::prev(node_storage.end());
 
+        for (NodeIt node = parent; node != root; node = node->parent) 
+            node->subtree_size++;   
+        if (!empty())
+            root->subtree_size++;
+
         new_node->parent = parent;
         if (empty())
-            root = new_node; //tree was empty
+            root = new_node; 
         else if (key < parent->key)
             parent->left = new_node;
         else 
             parent->right = new_node;
-
-        for (CNodeIt node = parent; node != root; node = node->parent) 
-            node->subtree_size++;   
-        if (!empty())
-            root->subtree_size++;
 
         tree_balance();
         return new_node;
@@ -375,7 +375,7 @@ private:
 public:
 
     //insert new node with given key and balance red-black tree
-    std::pair{CNodeIt, bool} insert(const KeyT key) {
+    std::pair<CNodeIt, bool> insert(const KeyT key) {
         auto [node, parent] = find_pos_to_insert(key);
         if (node == nil) {
             CNodeIt new_node = insert_impl(key, parent);
