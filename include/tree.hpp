@@ -14,20 +14,16 @@ struct unknown_query : public std::runtime_error {
               : std::runtime_error{message} {};
 };
 
-enum request_type: char {
-    KEY = 'k',
-    QUERY = 'q',
-    SELECT = 'm',
-    RANK = 'n'
+struct seg_fault : public std::runtime_error {
+    seg_fault(const char *message = "Going outside the bounds of the tree\n")
+              : std::runtime_error{message} {};
 };
+
 
 namespace Trees {
 
 enum class color_type { red, black };
-enum class bound_type { 
-    lwbound_mode = 0,
-    upbound_mode = 1
-};
+enum class bound_type { lwbound_mode, upbound_mode };
 
 template <typename KeyT>
 class Search_RBTree final {
@@ -54,7 +50,7 @@ public:
     //constructor
     Search_RBTree() {
         node_storage.emplace_back(KeyT{}, node_storage.end(), color_type::black, 0);
-        nil = std::prev(node_storage.end()); //leaves in tree
+        nil = node_storage.begin(); //leaves in tree
         root = nil;
     } 
 
@@ -83,7 +79,7 @@ private:
     }
 
     //auxiliary function for lower_bound() and upper_bound()
-    CNodeIt bound_impl(const KeyT key, bound_type mode) const {
+    CNodeIt bound_impl(const KeyT &key, bound_type mode) const {
         CNodeIt res = nil;
         CNodeIt node = root;
         while (node != nil) {
@@ -153,12 +149,12 @@ private:
         return dist;
     }
 
-    KeyT select_helper(int i, const CNodeIt curr_elem) const {
+    CNodeIt select_helper(int i, CNodeIt curr_elem) const {
         if (i < 1)
             throw unknown_query{};
         int curr_rank = curr_elem->left->subtree_size + 1;
         if (i == curr_rank)
-            return curr_elem->key;
+            return curr_elem;
         else if (i < curr_rank)
             return select_helper(i, curr_elem->left);
         else 
@@ -167,16 +163,17 @@ private:
 
 public: 
     //not less than key
-    CNodeIt lower_bound(const KeyT key) const {
+    CNodeIt lower_bound(const KeyT &key) const {
         return bound_impl(key, bound_type::lwbound_mode);
     }
 
     //greater
-    CNodeIt upper_bound(const KeyT key) const {
+    CNodeIt upper_bound(const KeyT &key) const {
         return bound_impl(key, bound_type::upbound_mode);
     }
 
-    int range_query(const KeyT fst, const KeyT snd) const {
+    /* counts number of nodes in tree such that their keys all lie strictly between left and right boundaries, inclusive.*/
+    int range_query(const KeyT &fst, const KeyT &snd) const {
         if  (!(fst < snd)) 
             return 0;
 
@@ -185,14 +182,23 @@ public:
         return mydistance(start, fin);
     }
 
+    /* i-th smallest element, if request is for the smallest element with a number greater than 
+        the total number of elements in the tree, simply return the last smallest (that is, the largest) */
     KeyT select_ranked_elem(int i) const {
         if (i > root->subtree_size) 
             i = root->subtree_size;
-        return select_helper(i, root);
+        return select_helper(i, root)->key;
+    }
+
+    CNodeIt operator[](int i) const {
+        if (empty() || (i < 0) || (i >= size())) 
+            throw seg_fault{};
+        
+        return select_helper(i + 1, root);
     }
 
     //counts number of elements that are less than given key
-    int key_rank(const KeyT key) const {
+    int key_rank(const KeyT &key) const {
         CNodeIt node_bound = lower_bound(key);
         if (node_bound == nil)
             return root->subtree_size;
@@ -335,7 +341,7 @@ private:
         root->color = color_type::black;
     }
 
-    std::pair<NodeIt, NodeIt> find_pos_to_insert(const KeyT key) {
+    std::pair<NodeIt, NodeIt> find_pos_to_insert(const KeyT &key) {
         NodeIt parent = nil;
         NodeIt node = root;
 
@@ -351,7 +357,7 @@ private:
         return std::pair{node, parent};
     }
 
-    CNodeIt insert_impl(const KeyT key, NodeIt parent) {
+    CNodeIt insert_impl(const KeyT &key, NodeIt parent) {
         node_storage.emplace_back(key, nil); 
         NodeIt new_node = std::prev(node_storage.end());
 
@@ -375,7 +381,7 @@ private:
 public:
 
     //insert new node with given key and balance red-black tree
-    std::pair<CNodeIt, bool> insert(const KeyT key) {
+    std::pair<CNodeIt, bool> insert(const KeyT &key) {
         auto [node, parent] = find_pos_to_insert(key);
         if (node == nil) {
             CNodeIt new_node = insert_impl(key, parent);
