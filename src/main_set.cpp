@@ -3,7 +3,7 @@
 #include <set>
 #include "tree.hpp"
 
-using namespace yLab;
+using namespace yLab; //for types of requests
 
 template <typename C, typename T> int range_query(const C &s, T fst, T snd) {
   if (fst >= snd)
@@ -28,8 +28,7 @@ int main() {
       std::cin >> value;
       assert(std::cin.good());
       s.insert(value);
-    }
-    if (c == QUERY) {
+    } else if (c == QUERY) {
       int fst, snd;
       std::cin >> fst >> snd;
       assert(std::cin.good());

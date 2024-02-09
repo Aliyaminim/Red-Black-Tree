@@ -21,7 +21,7 @@ int main() {
       std::cin >> value;
       assert(std::cin.good());
       if (hash_input.find(value) == hash_input.end()) {
-        tree.rb_insert(value);
+        tree.insert(value);
         hash_input.emplace(value, value);
       }
       //tree.print();

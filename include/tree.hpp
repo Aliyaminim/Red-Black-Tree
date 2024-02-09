@@ -6,6 +6,7 @@
 #include <iterator>
 #include <cassert>
 #include <utility>
+#include <iterator>
 
 namespace yLab {
 struct unknown_query : public std::runtime_error {
@@ -101,18 +102,6 @@ private:
         return res;
     }
 
-public: //селекторы
-
-    //not less than key
-    CNodeIt lower_bound(const KeyT key) const {
-        return bound_impl(key, bound_type::lwbound_mode);
-    }
-
-    //greater
-    CNodeIt upper_bound(const KeyT key) const {
-        return bound_impl(key, bound_type::upbound_mode);
-    }
-
     int mydistance(const CNodeIt start, const CNodeIt fin) const {
         if (start == nil)
             return 0;
@@ -164,15 +153,6 @@ public: //селекторы
         return dist;
     }
 
-    int range_query(const KeyT fst, const KeyT snd) const {
-        if  (!(fst < snd)) 
-            return 0;
-
-        const CNodeIt start = lower_bound(fst);
-        const CNodeIt fin = upper_bound(snd);   
-        return mydistance(start, fin);
-    }
-
     KeyT select_helper(int i, const CNodeIt curr_elem) const {
         if (i < 1)
             throw unknown_query{};
@@ -183,6 +163,26 @@ public: //селекторы
             return select_helper(i, curr_elem->left);
         else 
             return select_helper(i-curr_rank, curr_elem->right);
+    }
+
+public: 
+    //not less than key
+    CNodeIt lower_bound(const KeyT key) const {
+        return bound_impl(key, bound_type::lwbound_mode);
+    }
+
+    //greater
+    CNodeIt upper_bound(const KeyT key) const {
+        return bound_impl(key, bound_type::upbound_mode);
+    }
+
+    int range_query(const KeyT fst, const KeyT snd) const {
+        if  (!(fst < snd)) 
+            return 0;
+
+        const CNodeIt start = lower_bound(fst);
+        const CNodeIt fin = upper_bound(snd);   
+        return mydistance(start, fin);
     }
 
     KeyT select_ranked_elem(int i) const {
@@ -235,9 +235,7 @@ private:
             return node->parent->right;
         else 
             return node->parent->left;
-    }
-
-public: // модификаторы
+    } 
 
 /* right_rotate(x)
     |       |
@@ -305,30 +303,6 @@ public: // модификаторы
         x->subtree_size = x->left->subtree_size + x->right->subtree_size + 1;
     }
 
-    void tree_insert(const KeyT key) {
-        node_storage.emplace_back(key, nil); 
-        NodeIt new_node = std::prev(node_storage.end());
-        NodeIt y = nil;
-        NodeIt x = root;
-
-        while (x != nil) {
-            y = x;           
-            assert((key != x->key) && "oops, repetitive keys aren't expected");
-            x->subtree_size++;
-            if (key < x->key)
-                x = x->left;
-            else
-                x = x->right;
-        }
-        new_node->parent = y;
-        if (y == nil)
-            root = new_node; //tree was empty
-        else if (key < y->key)
-            y->left = new_node;
-        else 
-            y->right = new_node;
-    }
-
     void tree_balance() {
         NodeIt y = nil;
         NodeIt z = std::prev(node_storage.end());
@@ -361,16 +335,60 @@ public: // модификаторы
         root->color = color_type::black;
     }
 
-    //insert new node with given key and balance red-black tree
-    void rb_insert(const KeyT key) {
-        tree_insert(key);
-        tree_balance();
+    std::pair{CNodeIt, NodeIt} find_pos_to_insert(const KeyT key) {
+        CNodeIt parent = nil;
+        NodeIt node = root;
+
+        while (node != nil) {        
+            if (key < node->key) 
+                parent = std::exchange(node, node->left);
+            else if (node->key < key) 
+                parent = std::exchange(node, node->right);
+            else 
+                break;
+        }
+
+        return std::pair{node, parent};
     }
 
-    void print_2(const CNodeIt x, int space) const {
+    CNodeIt insert_impl(const KeyT key, NodeIt parent) {
+        node_storage.emplace_back(key, nil); 
+        NodeIt new_node = std::prev(node_storage.end());
+
+        new_node->parent = parent;
+        if (empty())
+            root = new_node; //tree was empty
+        else if (key < parent->key)
+            parent->left = new_node;
+        else 
+            parent->right = new_node;
+
+        for (CNodeIt node = parent; node != root; node = node->parent) 
+            node->subtree_size++;   
+        if (!empty())
+            root->subtree_size++;
+
+        tree_balance();
+        return new_node;
+    }
+
+public:
+
+    //insert new node with given key and balance red-black tree
+    std::pair{CNodeIt, bool} insert(const KeyT key) {
+        auto [node, parent] = find_pos_to_insert(key);
+        if (node == nil) {
+            CNodeIt new_node = insert_impl(key, parent);
+            return std::pair{new_node, true};
+        } else {
+            return std::pair{node, false};
+        }
+    }
+
+    void print_impl(const CNodeIt x, int space) const {
         if (x != nil) {
             space += 10;
-            print_2(x->right, space);
+            print_impl(x->right, space);
             std::cout << std::endl;
             for (int i = 10; i < space; i++)
                 std::cout << " ";
@@ -380,12 +398,12 @@ public: // модификаторы
             else
                 std::cout << "r" << std::endl;
             
-            print_2(x->left, space);
+            print_impl(x->left, space);
         }
     }
 
     void print() const {
-        print_2(root, 0);
+        print_impl(root, 0);
     }
 
 }; //class Search_RBTree
