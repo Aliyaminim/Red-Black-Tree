@@ -58,4 +58,10 @@ TEST(Test_upperbound, Test2) {
 }
 
 
+//TEST(Lookup, find)
 
+//TEST(Lookup, contains)
+
+//TEST(Lookup, nth_smallest)
+
+//TEST(Lookup, n_less_than)
