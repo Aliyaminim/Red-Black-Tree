@@ -1,14 +1,12 @@
 #include <cassert>
 #include <iostream>
 #include <set>
-#include <unordered_map>
 #include "tree.hpp"
 
 using namespace yLab; 
 
 int main() {
   Trees::Search_RBTree<int> tree{};
-  std::unordered_map<int, int> hash_input;
   int ret = 0;
   
   for (;;) {
@@ -20,11 +18,7 @@ int main() {
       int value;
       std::cin >> value;
       assert(std::cin.good());
-      if (hash_input.find(value) == hash_input.end()) {
-        tree.insert(value);
-        hash_input.emplace(value, value);
-      }
-      //tree.print();
+      tree.insert(value);
     } else if (c == QUERY) {
       int fst, snd;
       std::cin >> fst >> snd;
