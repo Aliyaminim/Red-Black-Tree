@@ -55,6 +55,92 @@ public:
     bool empty() const noexcept { return root == nil; }
     int size() const noexcept { return node_storage.size() - 1; } 
 
+    //insert new node with given key and balance red-black tree
+    std::pair<CNodeIt, bool> insert(const KeyT &key) {
+        auto [node, parent] = find_pos_to_insert(key);
+        if (node == nil) {
+            CNodeIt new_node = insert_impl(key, parent);
+            return std::pair{new_node, true};
+        } else {
+            return std::pair{node, false};
+        }
+    }
+ 
+    CNodeIt find(const KeyT &key) const{
+        CNodeIt node = root;
+        while (node != nil) {
+            if (key < node->key)
+                node = node->left;
+            else if (node->key < key)
+                node = node->right;
+            else 
+                return node;
+        }
+        return nil;
+    }
+
+    bool contains (const KeyT &key) const { return find(key) != nil; }
+
+    //not less than key
+    CNodeIt lower_bound(const KeyT &key) const {
+        return bound_impl(key, bound_type::lwbound_mode);
+    }
+
+    //greater
+    CNodeIt upper_bound(const KeyT &key) const {
+        return bound_impl(key, bound_type::upbound_mode);
+    }
+
+    /* counts number of nodes in tree such that their keys all lie strictly between left and right boundaries, inclusive.*/
+    int range_query(const KeyT &fst, const KeyT &snd) const {
+        if  (!(fst < snd)) 
+            return 0;
+
+        const CNodeIt start = lower_bound(fst);
+        const CNodeIt fin = upper_bound(snd);   
+        return mydistance(start, fin);
+    }
+
+    /* i-th smallest element, if request is for the smallest element with a number greater than 
+        the total number of elements in the tree, simply return the last smallest (that is, the largest) */
+    KeyT select_ranked_elem(int i) const {
+        if (i > root->subtree_size) 
+            i = root->subtree_size;
+        return select_impl(i)->key;
+    }
+
+    const Node& operator[](int i) const {
+        if ((i < 0) || (i >= size())) 
+            throw std::out_of_range{"Went outside the bounds of the tree\n"};
+
+        int ith_smallest_el = i + 1;
+        return *(select_impl(ith_smallest_el));
+    }
+
+    //counts number of elements that are less than given key
+    int key_rank(const KeyT &key) const {
+        CNodeIt node_bound = lower_bound(key);
+        if (node_bound == nil)
+            return root->subtree_size;
+
+        KeyT key_bound = node_bound->key;
+        CNodeIt curr_root = root;
+        int rank = 0;
+
+        while (key_bound != curr_root->key) {
+            if (key_bound < curr_root->key) {
+                curr_root = curr_root->left;
+            } else if (curr_root->key < key_bound) {
+                rank += curr_root->left->subtree_size + 1;
+                curr_root = curr_root->right;
+            }
+        }
+        rank += curr_root->left->subtree_size;
+
+        return rank; 
+    }
+    //
+
 private:
 
     CNodeIt common_ancestor(const CNodeIt start, const CNodeIt fin, const CNodeIt curr_root) const { 
@@ -163,82 +249,6 @@ private:
             }
         }
         throw unknown_query{};
-    }
-
-public: 
-    CNodeIt find(const KeyT &key) const{
-        CNodeIt node = root;
-        while (node != nil) {
-            if (key < node->key)
-                node = node->left;
-            else if (node->key < key)
-                node = node->right;
-            else 
-                return node;
-        }
-
-        return nil;
-    }
-
-    bool contains (const KeyT &key) const { return find(key) != nil; }
-
-    //not less than key
-    CNodeIt lower_bound(const KeyT &key) const {
-        return bound_impl(key, bound_type::lwbound_mode);
-    }
-
-    //greater
-    CNodeIt upper_bound(const KeyT &key) const {
-        return bound_impl(key, bound_type::upbound_mode);
-    }
-
-    /* counts number of nodes in tree such that their keys all lie strictly between left and right boundaries, inclusive.*/
-    int range_query(const KeyT &fst, const KeyT &snd) const {
-        if  (!(fst < snd)) 
-            return 0;
-
-        const CNodeIt start = lower_bound(fst);
-        const CNodeIt fin = upper_bound(snd);   
-        return mydistance(start, fin);
-    }
-
-    /* i-th smallest element, if request is for the smallest element with a number greater than 
-        the total number of elements in the tree, simply return the last smallest (that is, the largest) */
-    KeyT select_ranked_elem(int i) const {
-        if (i > root->subtree_size) 
-            i = root->subtree_size;
-        return select_impl(i)->key;
-    }
-
-    const Node& operator[](int i) const {
-        if ((i < 0) || (i >= size())) 
-            throw std::out_of_range{"Went outside the bounds of the tree\n"};
-
-        int ith_smallest_el = i + 1;
-        return *(select_impl(ith_smallest_el));
-    }
-
-    //counts number of elements that are less than given key
-    int key_rank(const KeyT &key) const {
-        CNodeIt node_bound = lower_bound(key);
-        if (node_bound == nil)
-            return root->subtree_size;
-
-        KeyT key_bound = node_bound->key;
-        CNodeIt curr_root = root;
-        int rank = 0;
-
-        while (key_bound != curr_root->key) {
-            if (key_bound < curr_root->key) {
-                curr_root = curr_root->left;
-            } else if (curr_root->key < key_bound) {
-                rank += curr_root->left->subtree_size + 1;
-                curr_root = curr_root->right;
-            }
-        }
-        rank += curr_root->left->subtree_size;
-
-        return rank; 
     }
 
 private: 
@@ -398,17 +408,6 @@ private:
     }
 
 public:
-
-    //insert new node with given key and balance red-black tree
-    std::pair<CNodeIt, bool> insert(const KeyT &key) {
-        auto [node, parent] = find_pos_to_insert(key);
-        if (node == nil) {
-            CNodeIt new_node = insert_impl(key, parent);
-            return std::pair{new_node, true};
-        } else {
-            return std::pair{node, false};
-        }
-    }
 
     void print_impl(const CNodeIt x, int space) const {
         if (x != nil) {
