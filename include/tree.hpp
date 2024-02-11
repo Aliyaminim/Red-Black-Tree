@@ -51,7 +51,7 @@ public:
 
     //capacity 
     bool empty() const noexcept { return root == nil; }
-    int size() const noexcept { return (empty()) ? 0 : root->subtree_size + 1; } 
+    int size() const noexcept { return node_storage.size() - 1; } 
 
 private:
 
@@ -208,12 +208,12 @@ public:
         return select_impl(i)->key;
     }
 
-    CNodeIt operator[](int i) const {
+    const Node& operator[](int i) const {
         if ((i < 0) || (i >= size())) 
             throw std::out_of_range{"Went outside the bounds of the tree\n"};
 
         int ith_smallest_el = i + 1;
-        return select_impl(ith_smallest_el);
+        return *(select_impl(ith_smallest_el));
     }
 
     //counts number of elements that are less than given key
@@ -377,14 +377,13 @@ private:
     }
 
     CNodeIt insert_impl(const KeyT &key, NodeIt parent) {
-        node_storage.emplace_back(key, parent); 
+        node_storage.emplace_back(key, nil); //parent, left and right become equal to nil
         NodeIt new_node = std::prev(node_storage.end());
 
-        for (NodeIt node = parent; node != root; node = node->parent) 
+        for (NodeIt node = parent; node != nil; node = node->parent) 
             node->subtree_size++;   
-        if (!empty())
-            root->subtree_size++;
-
+        
+        new_node->parent = parent;
         if (empty())
             root = new_node; 
         else if (key < parent->key)
