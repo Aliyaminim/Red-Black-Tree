@@ -24,17 +24,23 @@ int main() {
     std::cin >> c;
     if (!std::cin)
       break;
-    if (c == KEY) {
+
+    switch (c) {
+    case KEY:
       int value;
       std::cin >> value;
       assert(std::cin.good());
       s.insert(value);
-    } else if (c == QUERY) {
+      break;
+    
+    case QUERY:
       int fst, snd;
       std::cin >> fst >> snd;
       assert(std::cin.good());
       std::cout << range_query(s, fst, snd) << " ";
+      break;
     }
   }
   std::cout << std::endl;
+  return 0;
 }
