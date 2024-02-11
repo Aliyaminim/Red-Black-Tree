@@ -29,8 +29,10 @@ private:
         color_type color;
         int subtree_size;
 
-        Node(KeyT key_, typename std::list<Node>::iterator default_it, color_type color_ = color_type::red, int subtree_size_ = 1) : 
-            key(key_), parent(default_it), left(default_it), right(default_it), color(color_), subtree_size(subtree_size_) {};
+        Node(KeyT key_, typename std::list<Node>::iterator default_it, 
+                color_type color_ = color_type::red, int subtree_size_ = 1) : 
+            key(key_), parent(default_it), left(default_it), right(default_it), 
+                color(color_), subtree_size(subtree_size_) {};
 
     };
 
