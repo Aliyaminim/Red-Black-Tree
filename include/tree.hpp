@@ -7,15 +7,11 @@
 #include <cassert>
 #include <utility>
 #include <iterator>
+#include <stdexcept>
 
 namespace yLab {
 struct unknown_query : public std::runtime_error {
     unknown_query(const char *message = "Given rank must be positive\n")
-              : std::runtime_error{message} {};
-};
-
-struct seg_fault : public std::runtime_error {
-    seg_fault(const char *message = "Going outside the bounds of the tree\n")
               : std::runtime_error{message} {};
 };
 
@@ -213,8 +209,8 @@ public:
     }
 
     CNodeIt operator[](int i) const {
-        if (empty() || (i < 0) || (i >= size())) 
-            throw seg_fault{};
+        if ((i < 0) || (i >= size())) 
+            throw std::out_of_range{"Went outside the bounds of the tree\n"};
 
         int ith_smallest_el = i + 1;
         return select_impl(ith_smallest_el);
@@ -381,7 +377,7 @@ private:
     }
 
     CNodeIt insert_impl(const KeyT &key, NodeIt parent) {
-        node_storage.emplace_back(key, nil); 
+        node_storage.emplace_back(key, parent); 
         NodeIt new_node = std::prev(node_storage.end());
 
         for (NodeIt node = parent; node != root; node = node->parent) 
@@ -389,7 +385,6 @@ private:
         if (!empty())
             root->subtree_size++;
 
-        new_node->parent = parent;
         if (empty())
             root = new_node; 
         else if (key < parent->key)
