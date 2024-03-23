@@ -1,29 +1,41 @@
 # Red-Black-Tree
-Project name: Red-black Tree
+Implementation of a class Red Black Tree
 
-Contributors: Minimullina Aliya
+## Task
+The input consists of keys (each key is an integer, all keys are different) and queries (each query is a pair of two integers, the second one is greater than the first). For each query, we need to count the number of keys in the tree such that they all lie strictly between its left and right boundaries inclusive.
 
-To install and run the code, follow these steps:
+• Input: k 10 k 20 q 8 31 q 6 9 k 30 k 40 q 15 40.
 
-    git clone https://github.com/Aliyaminim/Red-Black-Tree
-    cd Red-Black-Tree
-    bash run.sh
-    cd test
-    bash testing.sh
+• Output: 2 0 3.
+
+Query (m) for finding the k-th smallest element. If the zeroth (minus first and so on) smallest is requested, an error should be returned with a non-zero return code. If the smallest element with a number greater than the total number of elements in the tree is requested, simply return the last smallest (i.e., the largest).
+Query (n) for finding the number of elements less than a given number.
+
+• Input: k 8 k 2 k -1 m 1 m 2 n 3
+
+• Output: -1 2 2.
+
+Keys can be arbitrarily mixed with queries.
+
+## How to build
+```bash
+git clone https://github.com/Aliyaminim/Red-Black-Tree
+cd Red-Black-Tree
+cmake -S ./ -B build/
+cd build/
+cmake --build .
+```
+
+## How to run the program
+```bash
+./main_rbt < [file]
+```
+
+## How to test the program
+```bash
+cd ../test
+bash testing.sh
+```
+
     
-HW:
 
-На вход поступают ключи (каждый ключ это целое число, все ключи разные) и запросы (каждый запрос это пара из двух целых чисел, второе больше первого). Нужно для каждого запроса подсчитать в дереве количество ключей, таких, что все они лежат строго между его левой и правой границами включительно.
-
-• Вход: k 10 k 20 q 8 31 q 6 9 k 30 k 40 q 15 40.
-
-• Результат: 2 0 3.
-
-Запрос (m) на поиск k-го наименьшего элемента. Если запрашивается нулевой (минус первый и т.д.) наименьший выдавайте ошибку и возвращайте ненулевой код возврата. Если запрашивается наименьший элемент с номером больше чем вообще количество элементов в дереве, выдавайте просто последний наименьший (то есть наибольший).
-Запрос (n) на поиск количества элементов, меньших, чем заданный.
-
-• Вход: k 8 k 2 k -1 m 1 m 2 n 3
-
-• Результат: -1 2 2
-
-Ключи могут быть как угодно перемешаны с запросами. 
